@@ -1,107 +1,130 @@
-/* Database Schema for Lumaka StickerQuest
-    Erstellt die Tabellen zur Verwaltung von Usern, Aufgaben, Stickern und Bingo-System
-*/
+/*
+ * Datenbankschema für Lumaka StickerQuest
+ * Beschreibung: Tabellen zur Verwaltung von Benutzern, Aufgaben, Stickern und Bingo-System
+ */
 
--- Nutzertabelle
+-- =============================================
+-- BENUTZER UND AUTHENTIFIZIERUNG
+-- =============================================
+
+-- Benutzertabelle
 CREATE TABLE users (
-    user_ID SERIAL PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    birth_date DATE
+    birth_date DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Stickertabelle
+-- =============================================
+-- STICKER-SYSTEM
+-- =============================================
+
+-- Sticker-Sets (Sammlungen)
 CREATE TABLE sticker_sets (
-    set_ID SERIAL PRIMARY KEY,
-    set_name VARCHAR(50) NOT NULL,
-    description TEXT
+    set_id SERIAL PRIMARY KEY,
+    set_name VARCHAR(100) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Einzelne Sticker
 CREATE TABLE stickers (
-    sticker_ID SERIAL PRIMARY KEY,
-    set_ID INTEGER REFERENCES sticker_sets(set_ID) ON DELETE CASCADE,
-    sticker_name VARCHAR(50) NOT NULL,
+    sticker_id SERIAL PRIMARY KEY,
+    set_id INTEGER REFERENCES sticker_sets(set_id) ON DELETE CASCADE,
+    sticker_name VARCHAR(100) NOT NULL,
     image_path VARCHAR(255), -- Pfad zur Sticker-Grafik
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Sticker Inventar
+-- Sticker-Inventar der Benutzer
 CREATE TABLE user_sticker_inventory (
-    user_ID INTEGER REFERENCES users(user_ID) ON DELETE CASCADE,
-    sticker_id INTEGER REFERENCES stickers(sticker_ID) ON DELETE CASCADE,
-    PRIMARY KEY (user_ID, sticker_ID)
+    user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
+    sticker_id INTEGER REFERENCES stickers(sticker_id) ON DELETE CASCADE,
+    acquired_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, sticker_id)
 );
 
--- Bingo Board
+-- =============================================
+-- BINGO-SYSTEM
+-- =============================================
+
 CREATE TABLE bingo_board (
-    board_ID SERIAL PRIMARY KEY,
-    user_ID INTEGER REFERENCES users(user_ID) ON DELETE CASCADE,
-    size_x INTEGER DEFAULT 3,
-    size_y INTEGER DEFAULT 3
+    board_id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE UNIQUE,
+    last_reset TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Zeitpunkt des letzten Zurücksetzens
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Felder auf dem Bingoboard
 CREATE TABLE bingo_fields (
-    field_ID SERIAL PRIMARY KEY,
-    board_ID INTEGER REFERENCES bingo_board(board_ID) ON DELETE CASCADE,
-    position_x INTEGER NOT NULL,
-    position_y INTEGER NOT NULL,
-    sticker_ID INTEGER REFERENCES stickers(sticker_ID) ON DELETE SET NULL,
-    UNIQUE(board_ID, position_x, position_y)
+    field_id SERIAL PRIMARY KEY,
+    board_id INTEGER REFERENCES bingo_board(board_id) ON DELETE CASCADE,
+    position_x INTEGER NOT NULL CHECK (position_x >= 0 AND position_x < 3), -- Beschränkung auf 0-2
+    position_y INTEGER NOT NULL CHECK (position_y >= 0 AND position_y < 3), -- Beschränkung auf 0-2
+    sticker_id INTEGER REFERENCES stickers(sticker_id) ON DELETE SET NULL,
+    is_completed BOOLEAN DEFAULT FALSE,
+    UNIQUE(board_id, position_x, position_y)
 );
 
--- Vorgefertigte Aufgaben
+-- =============================================
+-- AUFGABEN-SYSTEM
+-- =============================================
+
+-- Vorgefertigte Aufgabenvorlagen
 CREATE TABLE task_templates (
-    template_ID SERIAL PRIMARY KEY,
-    template_name VARCHAR (255) NOT NULL,
+    template_id SERIAL PRIMARY KEY,
+    template_name VARCHAR(255) NOT NULL,
     description TEXT,
     default_points INTEGER DEFAULT 10,
-    is_active BOOLEAN DEFAULT true
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Vorgefertigte Listen (Sammlung von Templates)
+-- Vorgefertigte Listen (Sammlung von Vorlagen)
 CREATE TABLE predefined_lists (
-    list_ID SERIAL PRIMARY KEY,
-    list_name VARCHAR(50) NOT NULL,
+    list_id SERIAL PRIMARY KEY,
+    list_name VARCHAR(100) NOT NULL,
     description TEXT,
-    is_active BOOLEAN DEFAULT true
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Zuordnung von Templates zu Listen
+-- Zuordnung von Vorlagen zu Listen
 CREATE TABLE predefined_list_items (
-    list_ID INTEGER REFERENCES predefined_list(list_ID) ON DELETE CASCADE
-    template_ID INTEGER REFERENCES task_templates(template_ID) ON DELETE CASCADE,
+    list_id INTEGER REFERENCES predefined_lists(list_id) ON DELETE CASCADE,
+    template_id INTEGER REFERENCES task_templates(template_id) ON DELETE CASCADE,
     sort_order INTEGER DEFAULT 0,
-    PRIMARY KEY (list_ID, template_ID)
+    PRIMARY KEY (list_id, template_id)
 );
 
--- Nutzeraufgaben
+-- Benutzeraufgaben
 CREATE TABLE user_tasks (
-    task_ID SERIAL PRIMARY KEY,
-    user_ID INTEGER REFERENCES users(user_ID) ON DELETE CASCADE,
-    template_ID INTEGER REFERENCES task_templates(template_ID) ON DELETE SET NULL, -- setzt NULL, wenn individuell
+    task_id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
+    template_id INTEGER REFERENCES task_templates(template_id) ON DELETE SET NULL, -- NULL bei individuellen Aufgaben
     task_title VARCHAR(255) NOT NULL,
     task_description TEXT,
     points_reward INTEGER DEFAULT 10,
     is_completed BOOLEAN DEFAULT false,
-    is_active BOOLEAN DEFAULT true
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Nutzerliste
+-- Benutzerlisten
 CREATE TABLE user_lists ( 
-    list_ID SERIAL PRIMARY KEY,
-    user_ID INTEGER REFERENCES users(user_ID) ON DELETE CASCADE,
+    list_id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
+    predefined_list_id INTEGER REFERENCES predefined_lists(list_id), -- Optional: Referenz auf vorgefertigte Liste
     list_name VARCHAR(255) NOT NULL,
     description TEXT,
-    is_active BOOLEAN DEFAULT true
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Zuordnung der Aufgaben
-CREATE TABLE user_list_tasks(
-    list_ID INTEGER REFERENCES user_lists(list_ID) ON DELETE CASCADE,
-    task_id INTEGER REFERENCES user_tasks(task_ID) ON DELETE CASCADE,
+-- Zuordnung der Aufgaben zu Benutzerlisten
+CREATE TABLE user_list_tasks (
+    list_id INTEGER REFERENCES user_lists(list_id) ON DELETE CASCADE,
+    task_id INTEGER REFERENCES user_tasks(task_id) ON DELETE CASCADE,
     sort_order INTEGER DEFAULT 0,
-    PRIMARY KEY (list_ID, task_ID)
+    PRIMARY KEY (list_id, task_id)
 );
-
--- Punkte berechnung

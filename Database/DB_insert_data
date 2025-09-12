@@ -1,12 +1,36 @@
+-- Testbenutzer anlegen
+INSERT INTO users (username, password_hash, birth_date)
+VALUES
+('testuser01', '$2a$12$aB34cD56eF78gH90iJ12kL.mNoPqRsTuVwXyZ12AbCdEfGhIjKlMn', '1990-05-15'),
+('testuser02', '$2a$12$xY34zW56vU78tS90rQ12kL.mNoPqRsTuVwXyZ12AbCdEfGhIjKlMn', '1985-11-23'),
+('testuser03', '$2a$12$pO34lK56eF78gH90iJ12kL.mNoPqRsTuVwXyZ12AbCdEfGhIjKlMn', '2000-02-28');
+
+
+-- Sticker-Sets
+INSERT INTO sticker_sets (set_name, description)
+VALUES
+('Wolfchan', 'Verschiedene Wolfchan Sticker');
+
+-- Einzelne Sticker
+INSERT INTO stickers(set_id, sticker_name, image_path)
+VALUES
+(1, 'Wolfchan Hi', 'Pfad/zum/ordner');
+
+-- Sticker Inventar von testuser01 füllen
+INSERT INTO user_sticker_inventory (user_id, sticker_id)
+VALUES
+(1,1); -- Fügt dem Inventar von Testuser01 den Sticker 'Wolfchan Hi' hinzu
+
+
 -- Task Templates
 INSERT INTO task_templates (template_name, description, default_points)
 VALUES 
 ('Duschen', 'Self Care', 10),
 ('Zähne putzen', 'Self Care', 10),
 ('Spazieren gehen', 'Self Care', 10),
-('Wasser trinken', 'Self Care', 10),
+('Wasser trinken', 'Self Care', 10);
 
--- Vorgefertigte Listen
+-- Vorgefertigte Listen füllen
 INSERT INTO predefined_lists (list_name, description)
 VALUES ('Self Care', 'Simple Aufgaben');
 
