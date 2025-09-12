@@ -1,0 +1,16 @@
+-- Task Templates
+INSERT INTO task_templates (template_name, description, default_points)
+VALUES 
+('Duschen', 'Self Care', 10),
+('Zähne putzen', 'Self Care', 10),
+('Spazieren gehen', 'Self Care', 10),
+('Wasser trinken', 'Self Care', 10),
+
+-- Vorgefertigte Listen
+INSERT INTO predefined_lists (list_name, description)
+VALUES ('Self Care', 'Simple Aufgaben');
+
+INSERT INTO predefined_list_items(list_ID, template_ID, sort_order)
+VALUES
+(1,1,1), -- 1. Liste, Duschen
+(1,2,2); -- 1. Liste, Zähne putzen

@@ -1,0 +1,107 @@
+/* Database Schema for Lumaka StickerQuest
+    Erstellt die Tabellen zur Verwaltung von Usern, Aufgaben, Stickern und Bingo-System
+*/
+
+-- Nutzertabelle
+CREATE TABLE users (
+    user_ID SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    birth_date DATE
+);
+
+-- Stickertabelle
+CREATE TABLE sticker_sets (
+    set_ID SERIAL PRIMARY KEY,
+    set_name VARCHAR(50) NOT NULL,
+    description TEXT
+);
+
+-- Einzelne Sticker
+CREATE TABLE stickers (
+    sticker_ID SERIAL PRIMARY KEY,
+    set_ID INTEGER REFERENCES sticker_sets(set_ID) ON DELETE CASCADE,
+    sticker_name VARCHAR(50) NOT NULL,
+    image_path VARCHAR(255), -- Pfad zur Sticker-Grafik
+);
+
+-- Sticker Inventar
+CREATE TABLE user_sticker_inventory (
+    user_ID INTEGER REFERENCES users(user_ID) ON DELETE CASCADE,
+    sticker_id INTEGER REFERENCES stickers(sticker_ID) ON DELETE CASCADE,
+    PRIMARY KEY (user_ID, sticker_ID)
+);
+
+-- Bingo Board
+CREATE TABLE bingo_board (
+    board_ID SERIAL PRIMARY KEY,
+    user_ID INTEGER REFERENCES users(user_ID) ON DELETE CASCADE,
+    size_x INTEGER DEFAULT 3,
+    size_y INTEGER DEFAULT 3
+);
+
+-- Felder auf dem Bingoboard
+CREATE TABLE bingo_fields (
+    field_ID SERIAL PRIMARY KEY,
+    board_ID INTEGER REFERENCES bingo_board(board_ID) ON DELETE CASCADE,
+    position_x INTEGER NOT NULL,
+    position_y INTEGER NOT NULL,
+    sticker_ID INTEGER REFERENCES stickers(sticker_ID) ON DELETE SET NULL,
+    UNIQUE(board_ID, position_x, position_y)
+);
+
+-- Vorgefertigte Aufgaben
+CREATE TABLE task_templates (
+    template_ID SERIAL PRIMARY KEY,
+    template_name VARCHAR (255) NOT NULL,
+    description TEXT,
+    default_points INTEGER DEFAULT 10,
+    is_active BOOLEAN DEFAULT true
+);
+
+-- Vorgefertigte Listen (Sammlung von Templates)
+CREATE TABLE predefined_lists (
+    list_ID SERIAL PRIMARY KEY,
+    list_name VARCHAR(50) NOT NULL,
+    description TEXT,
+    is_active BOOLEAN DEFAULT true
+);
+
+-- Zuordnung von Templates zu Listen
+CREATE TABLE predefined_list_items (
+    list_ID INTEGER REFERENCES predefined_list(list_ID) ON DELETE CASCADE
+    template_ID INTEGER REFERENCES task_templates(template_ID) ON DELETE CASCADE,
+    sort_order INTEGER DEFAULT 0,
+    PRIMARY KEY (list_ID, template_ID)
+);
+
+-- Nutzeraufgaben
+CREATE TABLE user_tasks (
+    task_ID SERIAL PRIMARY KEY,
+    user_ID INTEGER REFERENCES users(user_ID) ON DELETE CASCADE,
+    template_ID INTEGER REFERENCES task_templates(template_ID) ON DELETE SET NULL, -- setzt NULL, wenn individuell
+    task_title VARCHAR(255) NOT NULL,
+    task_description TEXT,
+    points_reward INTEGER DEFAULT 10,
+    is_completed BOOLEAN DEFAULT false,
+    is_active BOOLEAN DEFAULT true
+);
+
+-- Nutzerliste
+CREATE TABLE user_lists ( 
+    list_ID SERIAL PRIMARY KEY,
+    user_ID INTEGER REFERENCES users(user_ID) ON DELETE CASCADE,
+    list_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    is_active BOOLEAN DEFAULT true
+);
+
+-- Zuordnung der Aufgaben
+CREATE TABLE user_list_tasks(
+    list_ID INTEGER REFERENCES user_lists(list_ID) ON DELETE CASCADE,
+    task_id INTEGER REFERENCES user_tasks(task_ID) ON DELETE CASCADE,
+    sort_order INTEGER DEFAULT 0,
+    PRIMARY KEY (list_ID, task_ID)
+);
+
+-- Punkte berechnung
