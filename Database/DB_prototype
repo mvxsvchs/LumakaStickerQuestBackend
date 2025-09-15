@@ -1,18 +1,28 @@
 /*
  * Datenbankschema für Lumaka StickerQuest
- * Beschreibung: Tabellen zur Verwaltung von Benutzern, Aufgaben, Stickern und Bingo-System
+ * Beschreibung: Tabellen zur Verwaltung von Benutzern, Aufgaben, Stickern und Bingosystem
  */
+
+ -- =============================================
+-- Sticker
+-- =============================================
+CREATE TABLE stickers(
+    sticker_id SERIAL PRIMARY KEY,
+    sticker_name VARCHAR(255),
+    sticker_path VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 -- =============================================
 -- BENUTZER UND AUTHENTIFIZIERUNG
 -- =============================================
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
-    username VARCHAR(100) UNIQUE NOT NOLL,
+    username VARCHAR(100) UNIQUE NOT NULL,
     email VARCHAR(255) NOT NULL,
     birth_date DATE,
     password_hash VARCHAR(255) NOT NULL,
-    points INT,
+    points INTEGER DEFAULT 0,
     sticker_id INTEGER REFERENCES stickers(sticker_id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -30,7 +40,7 @@ CREATE TABLE user_tasks(
 );
 
 -- =============================================
--- Bingoboard
+-- Bingoboard & Felder
 -- =============================================
 CREATE TABLE bingo_boards (
     board_id SERIAL PRIMARY KEY,

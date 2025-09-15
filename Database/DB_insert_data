@@ -1,11 +1,17 @@
--- Testbenutzer anlegen
-INSERT INTO users (username, email, birth_date, password_hash,)
+-- Sticker hinzufügen
+INSERT INTO stickers (sticker_name, sticker_path)
+VALUES
+('Wolfchan01', 'Pfad/zum/Ordner'),
+('Wolfchan02', 'Pfad/zum/Ordner');
+
+-- Testbenutzer hinzufügen
+INSERT INTO users (username, email, birth_date, password_hash)
 VALUES
 ('testuser01','testuser01@test.de', '1993-09-15', '$2a$12$aB34cD56eF78gH90iJ12kL.mNoPqRsTuVwXyZ12AbCdEfGhIjKlMn'),
 ('testuser02','testuser02@test.de', '1992-05-16',  '$2a$12$xY34zW56vU78tS90rQ12kL.mNoPqRsTuVwXyZ12AbCdEfGhIjKlMn'),
 ('testuser03','testuser03@test.de', '1991-02-17',  '$2a$12$pO34lK56eF78gH90iJ12kL.mNoPqRsTuVwXyZ12AbCdEfGhIjKlMn');
 
--- Aufgaben hinzufügen
+-- Testaufgaben hinzufügen
 INSERT INTO user_tasks (task_description, task_category)
 VALUES
 ('Testaufgabe', 'Test'),
