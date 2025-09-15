@@ -1,6 +1,6 @@
 
 namespace LumakaStickerQuestBackend.Classes
-{ 
+{
 	public class Board
 	{
 		/// <summary>
@@ -8,6 +8,7 @@ namespace LumakaStickerQuestBackend.Classes
 		/// </summary>
 
 		public int Id { get; set; }
-		public Field[] Fields {  get; set; }
+		public Field[] Fields { get; set; }
 		public bool IsCompleted { get; set; }
+	}
 }

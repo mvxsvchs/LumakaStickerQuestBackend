@@ -1,0 +1,119 @@
+﻿<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProjectGuid>{0D998489-E2C4-407C-9C11-3CDA994171C8}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <NoStandardLibraries>false</NoStandardLibraries>
+    <AssemblyName>ConsoleApplication</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace>LumakaStickerQuestBackend</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".git\COMMIT_EDITMSG" />
+    <None Include=".git\config" />
+    <None Include=".git\description" />
+    <None Include=".git\HEAD" />
+    <None Include=".git\hooks\applypatch-msg.sample" />
+    <None Include=".git\hooks\commit-msg.sample" />
+    <None Include=".git\hooks\fsmonitor-watchman.sample" />
+    <None Include=".git\hooks\post-update.sample" />
+    <None Include=".git\hooks\pre-applypatch.sample" />
+    <None Include=".git\hooks\pre-commit.sample" />
+    <None Include=".git\hooks\pre-merge-commit.sample" />
+    <None Include=".git\hooks\pre-push.sample" />
+    <None Include=".git\hooks\pre-rebase.sample" />
+    <None Include=".git\hooks\pre-receive.sample" />
+    <None Include=".git\hooks\prepare-commit-msg.sample" />
+    <None Include=".git\hooks\push-to-checkout.sample" />
+    <None Include=".git\hooks\sendemail-validate.sample" />
+    <None Include=".git\hooks\update.sample" />
+    <None Include=".git\index" />
+    <None Include=".git\info\exclude" />
+    <None Include=".git\logs\HEAD" />
+    <None Include=".git\logs\refs\heads\main" />
+    <None Include=".git\logs\refs\remotes\origin\HEAD" />
+    <None Include=".git\logs\refs\remotes\origin\main" />
+    <None Include=".git\objects\01\9efc64d23baf32ec80def962e580413ce0b9b4" />
+    <None Include=".git\objects\14\3a03503d3dbbd22de5bf6585f7f4341d61af89" />
+    <None Include=".git\objects\31\ef31458ae9c2aa4643e28d1da41ebef8bc5c3e" />
+    <None Include=".git\objects\57\c694110b03f7c9f0839f23d4bbff86e3ac71f8" />
+    <None Include=".git\objects\57\ce668f55f4c8e097d1cc8cb23f7ffadda0ae94" />
+    <None Include=".git\objects\60\b7a04fd86ad09861132e2afbeccbc83a92ca77" />
+    <None Include=".git\objects\82\0cf6ead872de750e52b56dd8e8319525bca2b7" />
+    <None Include=".git\objects\82\c1d53a1d7c7d117d75960821d074f92bc08aee" />
+    <None Include=".git\objects\c9\23e7e82371101871ec2a069553288dd4785b0e" />
+    <None Include=".git\objects\ef\727dfb59174c659c00520cbaadf4f567dbab22" />
+    <None Include=".git\objects\ff\d02c3e90b73c7ee7797827b617c7a171f7271f" />
+    <None Include=".git\objects\pack\pack-63a5fabfcde687a61e0dce72acbac9b371830e4d.idx" />
+    <None Include=".git\objects\pack\pack-63a5fabfcde687a61e0dce72acbac9b371830e4d.pack" />
+    <None Include=".git\objects\pack\pack-63a5fabfcde687a61e0dce72acbac9b371830e4d.rev" />
+    <None Include=".git\packed-refs" />
+    <None Include=".git\refs\heads\main" />
+    <None Include=".git\refs\remotes\origin\HEAD" />
+    <None Include=".git\refs\remotes\origin\main" />
+    <None Include=".vs\LumakaStickerQuestBackend\FileContentIndex\133240e1-956a-45e4-b6f8-44fe14e1d60b.vsidx" />
+    <None Include=".vs\LumakaStickerQuestBackend\FileContentIndex\6560a365-ea1f-42ac-bd6c-6e6896e5a6db.vsidx" />
+    <None Include=".vs\LumakaStickerQuestBackend\FileContentIndex\831452b1-bcbd-4396-bfb3-2643bf0dcaa3.vsidx" />
+    <None Include=".vs\LumakaStickerQuestBackend\FileContentIndex\8b9aace9-8d49-49ec-80aa-aebb2f0f46eb.vsidx" />
+    <None Include=".vs\LumakaStickerQuestBackend\FileContentIndex\f7f57840-bdc6-434a-9979-3ba37dea499d.vsidx" />
+    <None Include=".vs\LumakaStickerQuestBackend\v17\.wsuo" />
+    <None Include=".vs\LumakaStickerQuestBackend\v17\DocumentLayout.backup.json" />
+    <None Include=".vs\LumakaStickerQuestBackend\v17\DocumentLayout.json" />
+    <None Include=".vs\slnx.sqlite" />
+    <None Include=".vs\VSWorkspaceState.json" />
+    <None Include="Database\DB_basebuild" />
+    <None Include="Database\DB_insert_data" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include=".git\ms-persist.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="API\api.cs" />
+    <Compile Include="Classes\Board.cs" />
+    <Compile Include="Classes\Field.cs" />
+    <Compile Include="Classes\ListItem.cs" />
+    <Compile Include="Classes\User.cs" />
+    <Compile Include="Functions\functions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include=".git\objects\info\" />
+    <Folder Include=".git\refs\tags\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
+  <ProjectExtensions>
+    <VisualStudio AllowExistingFolder="true" />
+  </ProjectExtensions>
+</Project>
