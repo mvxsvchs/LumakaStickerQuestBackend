@@ -106,7 +106,6 @@ CREATE TABLE user_tasks (
     task_description TEXT,
     points_reward INTEGER DEFAULT 10,
     is_completed BOOLEAN DEFAULT false,
-    is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
