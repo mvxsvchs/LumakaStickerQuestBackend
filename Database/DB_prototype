@@ -8,8 +8,6 @@
 -- =============================================
 CREATE TABLE stickers(
     sticker_id SERIAL PRIMARY KEY,
-    sticker_name VARCHAR(255),
-    sticker_path VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -30,12 +28,14 @@ CREATE TABLE users (
 -- =============================================
 -- AUFGABEN
 -- =============================================
-CREATE TABLE user_tasks(
+CREATE TABLE user_tasks (
     task_id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
     task_description TEXT,
-    task_category TEXT,
+    category_id INTEGER,
     points_reward INTEGER DEFAULT 10,
+    is_completed BOOLEAN DEFAULT false,
+    position INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -52,7 +52,7 @@ CREATE TABLE bingo_boards (
 CREATE TABLE bingo_fields (
     field_id SERIAL PRIMARY KEY,
     field_name VARCHAR(2) UNIQUE NOT NULL,
-    is_completed BOOLEAN DEFAULT false,
+    sticker VARCHAR(255) NULL,
     board_id INTEGER REFERENCES bingo_boards(board_id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
