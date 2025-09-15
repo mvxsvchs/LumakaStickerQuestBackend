@@ -1,6 +1,6 @@
 /*
  * Datenbankschema für Lumaka StickerQuest
- * Beschreibung: Tabellen zur Verwaltung von Benutzern, Aufgaben, Stickern und Bingo-System
+ * Beschreibung: Tabellen zur Verwaltung von Benutzern, Aufgaben, Stickern und Bingosystem
  */
 
  -- =============================================

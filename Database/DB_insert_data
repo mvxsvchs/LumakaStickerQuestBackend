@@ -2,7 +2,7 @@
 INSERT INTO stickers (sticker_name, sticker_path)
 VALUES
 ('Wolfchan01', 'Pfad/zum/Ordner'),
-('Wolfchan01', 'Pfad/zum/Ordner');
+('Wolfchan02', 'Pfad/zum/Ordner');
 
 -- Testbenutzer hinzufügen
 INSERT INTO users (username, email, birth_date, password_hash)
