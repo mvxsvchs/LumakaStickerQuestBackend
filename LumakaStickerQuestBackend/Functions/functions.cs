@@ -1,12 +1,21 @@
 
+using LumakaStickerQuestBackend.Classes;
+
 namespace LumakaStickerQuestBackend.Functions
 {
-	public class Functions
+	public class UserService
 	{
-		public async getUser(int Id)
+		public async Task<User> getUser(int userId)
 		{
-			if (Id == null) return null;
+			await Placeholder;
+		}
+	}
 
+	public class ListService
+	{
+		public async Task<ListItem> getListItem(int listId)
+		{
+			await Placeholder2;
 		}
 	}
 }
