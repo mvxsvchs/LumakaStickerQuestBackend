@@ -1,0 +1,6 @@
+@LumakaStickerQuestBackend_HostAddress = http://localhost:5179
+
+GET {{LumakaStickerQuestBackend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
