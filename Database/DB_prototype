@@ -40,7 +40,7 @@ CREATE TABLE user_tasks(
 );
 
 -- =============================================
--- Bingoboard
+-- Bingoboard & Felder
 -- =============================================
 CREATE TABLE bingo_boards (
     board_id SERIAL PRIMARY KEY,
