@@ -39,6 +39,17 @@ CREATE TABLE user_tasks (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+
+CREATE TABLE predefined_tasks (
+    task_id SERIAL PRIMARY KEY,
+    task_description TEXT,
+    category_id INTEGER,
+    points_reward INTEGER DEFAULT 10,
+--    is_completed BOOLEAN DEFAULT false, <--- ergibt keinen Sinn, wenn jeder User auf diese Tabelle zugreift
+    position INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- =============================================
 -- Bingoboard & Felder
 -- =============================================
