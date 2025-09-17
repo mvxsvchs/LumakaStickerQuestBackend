@@ -5,7 +5,7 @@ namespace LumakaStickerQuestBackend.Functions
 {
 	public class UserService
 	{
-		public async Task<User> getUser(int userId)
+		public async Task<User> GetUser(int userId)
 		{
 			await Placeholder;
 		}
@@ -13,7 +13,7 @@ namespace LumakaStickerQuestBackend.Functions
 
 	public class ListService
 	{
-		public async Task<ListItem> getListItem(int listId)
+		public async Task<ListItem> GetListItem(int listId)
 		{
 			await Placeholder2;
 		}
