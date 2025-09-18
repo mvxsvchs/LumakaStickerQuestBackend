@@ -28,22 +28,35 @@ CREATE TABLE users (
 -- =============================================
 -- AUFGABEN
 -- =============================================
+/*
+Category IDs:
+category.general    1
+category.work       2
+category.school     3
+category.household  4
+category.gym        5
+category.selfcare   6
+*/
+CREATE TABLE categories (
+    category_id SERIAL PRIMARY KEY,
+    category_name TEXT
+);
+
 CREATE TABLE user_tasks (
     task_id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
     task_description TEXT,
-    category_id INTEGER,
+    category_id INTEGER REFERENCES categories(category_id),
     points_reward INTEGER DEFAULT 10,
     is_completed BOOLEAN DEFAULT false,
     position INTEGER,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-
 CREATE TABLE predefined_tasks (
     task_id SERIAL PRIMARY KEY,
     task_description TEXT,
-    category_id INTEGER,
+    category_id INTEGER REFERENCES categories(category_id),
     points_reward INTEGER DEFAULT 10,
 --    is_completed BOOLEAN DEFAULT false, <--- ergibt keinen Sinn, wenn jeder User auf diese Tabelle zugreift
     position INTEGER,

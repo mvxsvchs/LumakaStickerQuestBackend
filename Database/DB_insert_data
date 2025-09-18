@@ -5,6 +5,25 @@ VALUES
 ('testuser02','testuser02@test.de', '1992-05-16',  '$2a$12$xY34zW56vU78tS90rQ12kL.mNoPqRsTuVwXyZ12AbCdEfGhIjKlMn'),
 ('testuser03','testuser03@test.de', '1991-02-17',  '$2a$12$pO34lK56eF78gH90iJ12kL.mNoPqRsTuVwXyZ12AbCdEfGhIjKlMn');
 
+-- Kategorien hinzufügen
+/*
+Category IDs:
+category.general    1
+category.work       2
+category.school     3
+category.household  4
+category.gym        5
+category.selfcare   6
+*/
+INSERT INTO categories (category_name)
+VALUES
+('Allgemein'),
+('Arbeit'),
+('Schule'),
+('Haushalt'),
+('Sport'),
+('Selbstpflege');
+
 -- Testaufgaben hinzufügen
 INSERT INTO user_tasks (task_description, category_id)
 VALUES
@@ -14,17 +33,31 @@ VALUES
 -- Vorgefertigte Aufhaben hinzufügen
 INSERT INTO predefined_tasks (task_description, category_id)
 VALUES
-('Duschen', '1'),
-('Zähne putzen', '1'),
-('Wasser trinken', '1'),
-('Achtsamkeitsübung machen', '1'),
-('Spazieren gehen', '1'),
-('Einkaufen gehen', '2'),
-('Staubsaugen', '2'),
-('Küche aufräumen', '2'),
-('Bad putzen', '2'),
-('Müll rausbringen', '2'),
-('Pfand wegbringen', '2');
+('Briefkasten leeren', '1'),
+('Kalender auf Termine prüfen', '1'),
+('Die Woche planen', '1'),
+('Postfach leeren', '2'),
+('Deadlines prüfen', '2'),
+('Arbeitsplatz aufräumen', '2'),
+('Hausaufgaben erledigen', '3'),
+('30 Minuten lernen', '3'),
+('Stundenplan überprüfen', '3'),
+('Einkaufen gehen', '4'),
+('Staubsaugen', '4'),
+('Küche aufräumen', '4'),
+('Bad putzen', '4'),
+('Müll rausbringen', '4'),
+('Pfand wegbringen', '4'),
+('Stretching', '5'),
+('Aktivität planen', '5'),
+('Trainingsfortschritt überprüfen', '5'),
+('Training durchführen', '5'),
+('Duschen', '6'),
+('Zähne putzen', '6'),
+('Wasser trinken', '6'),
+('Achtsamkeitsübung machen', '6'),
+('Spazieren gehen', '6');
+
 
 -- Bingofelder
 INSERT INTO bingo_fields (field_name)
