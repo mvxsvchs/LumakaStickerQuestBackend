@@ -3,13 +3,13 @@ using LumakaStickerQuestBackend.Functions;
 using Npgsql;
 
 // Get connection string
-string connectionString = ConfigurationHelper.GetConnectionString("DefaultConnection");
+//string connectionString = ConfigurationHelper.GetConnectionString("DefaultConnection");
 
 // Connect to the PostgreSQL server
-await using var conn = new NpgsqlConnection(connectionString);
-await conn.OpenAsync();
+//await using var conn = new NpgsqlConnection(connectionString);
+//await conn.OpenAsync();
 
-Console.WriteLine($"PostgreSQL version: {conn.PostgreSqlVersion}");
+//Console.WriteLine($"PostgreSQL version: {conn.PostgreSqlVersion}");
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,8 +19,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<ListService>();
+builder.Services.AddScoped<Services>();
+builder.Services.AddScoped<Services.UserS>();
 
 var app = builder.Build();
 
