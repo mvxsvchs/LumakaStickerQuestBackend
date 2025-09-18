@@ -11,13 +11,6 @@ CREATE TABLE stickers(
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE user_stickers (
-    user_id INTEGER REFERENCES users(user_id),
-    sticker_id INTEGER REFERENCES stickers(sticker_id),
-    PRIMARY KEY (user_id, sticker_id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
 -- =============================================
 -- BENUTZER UND AUTHENTIFIZIERUNG
 -- =============================================
@@ -29,6 +22,13 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     points INTEGER DEFAULT 0,
     sticker_id INTEGER REFERENCES stickers(sticker_id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE user_stickers (
+    user_id INTEGER REFERENCES users(user_id),
+    sticker_id INTEGER REFERENCES stickers(sticker_id),
+    PRIMARY KEY (user_id, sticker_id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
