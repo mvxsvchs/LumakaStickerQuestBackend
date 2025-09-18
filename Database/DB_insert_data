@@ -8,21 +8,21 @@ VALUES
 -- Kategorien hinzufügen
 /*
 Category IDs:
-category.general    1
-category.work       2
-category.school     3
-category.household  4
-category.gym        5
-category.selfcare   6
+category.general (Allgemein)        1
+category.work (Arbeit)              2
+category.household (Haushalt)       3
+category.school (Schule)            4
+category.selfcare (Selbstpflege)    5
+category.gym (Sport)                6
 */
 INSERT INTO categories (category_name)
 VALUES
 ('Allgemein'),
 ('Arbeit'),
-('Schule'),
 ('Haushalt'),
-('Sport'),
-('Selbstpflege');
+('Schule'),
+('Selbstpflege'),
+('Sport');
 
 -- Testaufgaben hinzufügen
 INSERT INTO user_tasks (task_description, category_id)
@@ -39,25 +39,24 @@ VALUES
 ('Postfach leeren', '2'),
 ('Deadlines prüfen', '2'),
 ('Arbeitsplatz aufräumen', '2'),
-('Hausaufgaben erledigen', '3'),
-('30 Minuten lernen', '3'),
-('Stundenplan überprüfen', '3'),
-('Einkaufen gehen', '4'),
-('Staubsaugen', '4'),
-('Küche aufräumen', '4'),
-('Bad putzen', '4'),
-('Müll rausbringen', '4'),
-('Pfand wegbringen', '4'),
-('Stretching', '5'),
-('Aktivität planen', '5'),
-('Trainingsfortschritt überprüfen', '5'),
-('Training durchführen', '5'),
-('Duschen', '6'),
-('Zähne putzen', '6'),
-('Wasser trinken', '6'),
-('Achtsamkeitsübung machen', '6'),
-('Spazieren gehen', '6');
-
+('Einkaufen gehen', '3'),
+('Staubsaugen', '3'),
+('Küche aufräumen', '3'),
+('Bad putzen', '3'),
+('Müll rausbringen', '3'),
+('Pfand wegbringen', '3'),
+('Hausaufgaben erledigen', '4'),
+('30 Minuten lernen', '4'),
+('Stundenplan überprüfen', '4'),
+('Duschen', '5'),
+('Zähne putzen', '5'),
+('Wasser trinken', '5'),
+('Achtsamkeitsübung machen', '5'),
+('Spazieren gehen', '5'),
+('Stretching', '6'),
+('Aktivität planen', '6'),
+('Trainingsfortschritt überprüfen', '6'),
+('Training durchführen', '6');
 
 -- Bingofelder
 INSERT INTO bingo_fields (field_name)

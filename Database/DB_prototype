@@ -30,12 +30,12 @@ CREATE TABLE users (
 -- =============================================
 /*
 Category IDs:
-category.general    1
-category.work       2
-category.school     3
-category.household  4
-category.gym        5
-category.selfcare   6
+category.general (Allgemein)        1
+category.work (Arbeit)              2
+category.household (Haushalt)       3
+category.school (Schule)            4
+category.selfcare (Selbstpflege)    5
+category.gym (Sport)                6
 */
 CREATE TABLE categories (
     category_id SERIAL PRIMARY KEY,
