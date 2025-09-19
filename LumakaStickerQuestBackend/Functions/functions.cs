@@ -53,6 +53,45 @@ namespace LumakaStickerQuestBackend.Functions
 					return null;
 				}
 			}
+
+			public async Task<User> GetByMailAndPwd(string mail, string pwd)
+			{
+				await using var conn = GetConnection();
+				await conn.OpenAsync();
+
+				var sql = @"
+					SELECT user_id
+					FROM users
+					WHERE username = @name AND password_hash = @pwd
+				";
+
+				await using var cmd = new NpgsqlCommand(sql, conn);
+				cmd.Parameters.AddWithValue("name", mail);
+				cmd.Parameters.AddWithValue("pwd", pwd);
+
+				await using var reader = await cmd.ExecuteReaderAsync();
+				if (await reader.ReadAsync())
+				{
+					return new User
+					{
+						Id = reader.GetInt32(reader.GetOrdinal("user_id")),
+						Name = reader.GetString(reader.GetOrdinal("username")),
+						Password = reader.GetString(reader.GetOrdinal("password_hash")),
+						Email = reader.GetString(reader.GetOrdinal("email")),
+						Points = reader.GetInt32(reader.GetOrdinal("points")),
+						Birthday = reader.IsDBNull(reader.GetOrdinal("birth_date"))
+							? null
+							: reader.GetDateTime(reader.GetOrdinal("birth_date")).ToString("yyyy-MM-dd"),
+						Stickers = reader.IsDBNull(reader.GetOrdinal("sticker_id"))
+							? new int[0]
+							: reader.GetFieldValue<int[]>(reader.GetOrdinal("sticker_id"))
+					};
+				}
+				else
+				{
+					return null;
+				}
+			}
 		}
 		/*
 		// Functions for operations related to lists
