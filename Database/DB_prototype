@@ -3,14 +3,6 @@
  * Beschreibung: Tabellen zur Verwaltung von Benutzern, Aufgaben, Stickern und Bingosystem
  */
 
- -- =============================================
--- Sticker
--- =============================================
-CREATE TABLE stickers(
-    sticker_id SERIAL PRIMARY KEY,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
 -- =============================================
 -- BENUTZER UND AUTHENTIFIZIERUNG
 -- =============================================
@@ -21,14 +13,7 @@ CREATE TABLE users (
     birth_date DATE,
     password_hash VARCHAR(255) NOT NULL,
     points INTEGER DEFAULT 0,
-    sticker_id INTEGER REFERENCES stickers(sticker_id) ON DELETE CASCADE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE user_stickers (
-    user_id INTEGER REFERENCES users(user_id),
-    sticker_id INTEGER REFERENCES stickers(sticker_id),
-    PRIMARY KEY (user_id, sticker_id),
+    sticker_id INTEGER[],
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
