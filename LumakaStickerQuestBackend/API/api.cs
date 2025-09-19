@@ -28,7 +28,7 @@ namespace LumakaStickerQuestBackend.API
 			return Ok(user); // HTTP 200 success & user
 		}
 
-		[HttpGet("{mail}, {pwd}")]
+		[HttpGet("{mail}/{pwd}")]
 		public async Task<ActionResult<User>> GetUserByMailPwd(string mail, string pwd)
 		{
 			var user = await _userService.GetByMailAndPwd(mail, pwd);

@@ -24,5 +24,36 @@
         "StatusCode": 200
       }
     ]
+  },
+  {
+    "ContainingType": "LumakaStickerQuestBackend.API.QuestController",
+    "Method": "GetUserByMailPwd",
+    "RelativePath": "api/Quest/{mail}/{pwd}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "mail",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "pwd",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "LumakaStickerQuestBackend.Classes.User",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
   }
 ]

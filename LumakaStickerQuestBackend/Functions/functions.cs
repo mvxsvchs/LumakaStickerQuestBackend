@@ -60,13 +60,13 @@ namespace LumakaStickerQuestBackend.Functions
 				await conn.OpenAsync();
 
 				var sql = @"
-					SELECT user_id
+					SELECT user_id, username, password_hash, email, points, birth_date, sticker_id
 					FROM users
-					WHERE username = @name AND password_hash = @pwd
+					WHERE email = @mail AND password_hash = @pwd
 				";
 
 				await using var cmd = new NpgsqlCommand(sql, conn);
-				cmd.Parameters.AddWithValue("name", mail);
+				cmd.Parameters.AddWithValue("mail", mail);
 				cmd.Parameters.AddWithValue("pwd", pwd);
 
 				await using var reader = await cmd.ExecuteReaderAsync();
