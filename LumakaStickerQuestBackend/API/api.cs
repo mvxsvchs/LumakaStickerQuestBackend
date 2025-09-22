@@ -18,7 +18,7 @@ namespace LumakaStickerQuestBackend.API
 		}
 
 		[HttpGet("{id}")]
-		public async Task<ActionResult<User>> GetUserByID(int id)
+		public async Task<ActionResult<FeUser>> GetUserByID(int id)
 		{
 			var user = await _userService.GetById(id);
 			if (user == null)
@@ -29,7 +29,7 @@ namespace LumakaStickerQuestBackend.API
 		}
 
 		[HttpGet("{mail}/{pwd}")]
-		public async Task<ActionResult<User>> GetUserByMailPwd(string mail, string pwd)
+		public async Task<ActionResult<FeUser>> GetUserByMailPwd(string mail, string pwd)
 		{
 			var user = await _userService.GetByMailAndPwd(mail, pwd);
 			if (user == null)
