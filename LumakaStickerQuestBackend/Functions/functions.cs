@@ -112,6 +112,32 @@ namespace LumakaStickerQuestBackend.Functions
 					return null;
 				}
 			}
+
+			public async Task<bool> RegisterUser(FeRegister user)
+			{
+				await using var conn = GetConnection();
+				await conn.OpenAsync();
+
+				var sql = @"
+					INSERT INTO users (username, email, password_hash)
+					VALUES (@username, @email, @password_hash);
+				";
+
+				try
+				{
+					await using var cmd = new NpgsqlCommand(sql, conn);
+					cmd.Parameters.AddWithValue("username", user.Username);
+					cmd.Parameters.AddWithValue("email", user.Mail);
+					cmd.Parameters.AddWithValue("password_hash", user.Password);
+
+					int rowsAffected = await cmd.ExecuteNonQueryAsync();
+					return rowsAffected == 1;
+				}
+				catch
+				{
+					return false;
+				}
+			}
 		}
 		/*
 		// Functions for operations related to lists

@@ -2,7 +2,7 @@
   {
     "ContainingType": "LumakaStickerQuestBackend.API.QuestController",
     "Method": "GetUserByID",
-    "RelativePath": "api/Quest/{id}",
+    "RelativePath": "api/Quest/get/{id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -15,7 +15,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "LumakaStickerQuestBackend.Classes.User",
+        "Type": "LumakaStickerQuestBackend.Classes.FeUser",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -28,25 +28,56 @@
   {
     "ContainingType": "LumakaStickerQuestBackend.API.QuestController",
     "Method": "GetUserByMailPwd",
-    "RelativePath": "api/Quest/{mail}/{pwd}",
-    "HttpMethod": "GET",
+    "RelativePath": "api/Quest/login/{login}",
+    "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "mail",
-        "Type": "System.String",
+        "Name": "login",
+        "Type": "LumakaStickerQuestBackend.Classes.FeLogin",
         "IsRequired": true
       },
       {
-        "Name": "pwd",
-        "Type": "System.String",
+        "Name": "login",
+        "Type": "",
         "IsRequired": true
       }
     ],
     "ReturnTypes": [
       {
-        "Type": "LumakaStickerQuestBackend.Classes.User",
+        "Type": "LumakaStickerQuestBackend.Classes.FeUser",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "LumakaStickerQuestBackend.API.QuestController",
+    "Method": "RegisterNewUser",
+    "RelativePath": "api/Quest/register/{register}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "register",
+        "Type": "LumakaStickerQuestBackend.Classes.FeRegister",
+        "IsRequired": true
+      },
+      {
+        "Name": "register",
+        "Type": "",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Boolean",
         "MediaTypes": [
           "text/plain",
           "application/json",

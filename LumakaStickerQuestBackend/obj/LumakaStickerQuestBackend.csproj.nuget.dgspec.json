@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\LucaMichaelis\\source\\repos\\LumakaStickerQuestBackend\\LumakaStickerQuestBackend\\LumakaStickerQuestBackend.csproj": {}
+    "C:\\Users\\LucaMichaelis\\Source\\Repos\\LumakaStickerQuestBackend\\LumakaStickerQuestBackend\\LumakaStickerQuestBackend.csproj": {}
   },
   "projects": {
-    "C:\\Users\\LucaMichaelis\\source\\repos\\LumakaStickerQuestBackend\\LumakaStickerQuestBackend\\LumakaStickerQuestBackend.csproj": {
+    "C:\\Users\\LucaMichaelis\\Source\\Repos\\LumakaStickerQuestBackend\\LumakaStickerQuestBackend\\LumakaStickerQuestBackend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\LucaMichaelis\\source\\repos\\LumakaStickerQuestBackend\\LumakaStickerQuestBackend\\LumakaStickerQuestBackend.csproj",
+        "projectUniqueName": "C:\\Users\\LucaMichaelis\\Source\\Repos\\LumakaStickerQuestBackend\\LumakaStickerQuestBackend\\LumakaStickerQuestBackend.csproj",
         "projectName": "LumakaStickerQuestBackend",
-        "projectPath": "C:\\Users\\LucaMichaelis\\source\\repos\\LumakaStickerQuestBackend\\LumakaStickerQuestBackend\\LumakaStickerQuestBackend.csproj",
+        "projectPath": "C:\\Users\\LucaMichaelis\\Source\\Repos\\LumakaStickerQuestBackend\\LumakaStickerQuestBackend\\LumakaStickerQuestBackend.csproj",
         "packagesPath": "C:\\Users\\LucaMichaelis\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\LucaMichaelis\\source\\repos\\LumakaStickerQuestBackend\\LumakaStickerQuestBackend\\obj\\",
+        "outputPath": "C:\\Users\\LucaMichaelis\\Source\\Repos\\LumakaStickerQuestBackend\\LumakaStickerQuestBackend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\LucaMichaelis\\AppData\\Roaming\\NuGet\\NuGet.Config",

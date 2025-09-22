@@ -17,7 +17,7 @@ namespace LumakaStickerQuestBackend.API
 			_userService = userService;
 		}
 
-		[HttpGet("{id}")]
+		[HttpGet("get/{id}")]
 		public async Task<ActionResult<FeUser>> GetUserByID(int id)
 		{
 			var user = await _userService.GetById(id);
@@ -28,7 +28,7 @@ namespace LumakaStickerQuestBackend.API
 			return Ok(user); // HTTP 200 success & user
 		}
 
-		[HttpGet("{login}")]
+		[HttpPost("login/{login}")]
 		public async Task<ActionResult<FeUser>> GetUserByMailPwd(FeLogin login)
 		{
 			var user = await _userService.GetByMailAndPwd(login.Mail, login.Password);
@@ -37,6 +37,17 @@ namespace LumakaStickerQuestBackend.API
 				return NotFound();
 			}
 			return Ok(user);
+		}
+
+		[HttpPost("register/{register}")]
+		public async Task<ActionResult<bool>> RegisterNewUser(FeRegister register)
+		{
+			var success = await _userService.RegisterUser(register);
+			if (success) 
+			{
+				return Ok();
+			}
+			return BadRequest();
 		}
 	}
 }
