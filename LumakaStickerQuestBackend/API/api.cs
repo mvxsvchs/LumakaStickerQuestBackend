@@ -28,25 +28,37 @@ namespace LumakaStickerQuestBackend.API
 			return Ok(user); // HTTP 200 success & user
 		}
 
-		[HttpPut("login/{login}")]
-		public async Task<ActionResult<FeUser>> GetUserByMailPwd(FeLogin login)
+		[HttpPut("login")]
+		public async Task<ActionResult<FeUser>> GetUserByMailPwd([FromBody] FeLogin login)
 		{
+			if (!ModelState.IsValid || login == null)
+			{
+				return BadRequest(ModelState);
+			}
+			
 			var user = await _userService.GetByMailAndPwd(login.Mail, login.Password);
 			if (user == null)
 			{
-				return NotFound();
+				return Unauthorized();
 			}
+
 			return Ok(user);
 		}
 
-		[HttpPost("register/{register}")]
-		public async Task<ActionResult<bool>> RegisterNewUser(FeRegister register)
+		[HttpPost("register")]
+		public async Task<ActionResult<bool>> RegisterNewUser([FromBody] FeRegister register)
 		{
+			if (!ModelState.IsValid || register == null)
+			{
+				return BadRequest(ModelState);
+			}
+
 			var success = await _userService.RegisterUser(register);
-			if (success) 
+			if (success)
 			{
 				return Ok();
 			}
+			
 			return BadRequest();
 		}
 	}

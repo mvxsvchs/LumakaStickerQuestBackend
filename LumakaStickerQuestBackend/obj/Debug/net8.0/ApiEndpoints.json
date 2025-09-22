@@ -28,19 +28,14 @@
   {
     "ContainingType": "LumakaStickerQuestBackend.API.QuestController",
     "Method": "GetUserByMailPwd",
-    "RelativePath": "api/Quest/login/{login}",
-    "HttpMethod": "POST",
+    "RelativePath": "api/Quest/login",
+    "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
         "Name": "login",
         "Type": "LumakaStickerQuestBackend.Classes.FeLogin",
-        "IsRequired": true
-      },
-      {
-        "Name": "login",
-        "Type": "",
         "IsRequired": true
       }
     ],
@@ -59,7 +54,7 @@
   {
     "ContainingType": "LumakaStickerQuestBackend.API.QuestController",
     "Method": "RegisterNewUser",
-    "RelativePath": "api/Quest/register/{register}",
+    "RelativePath": "api/Quest/register",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -67,11 +62,6 @@
       {
         "Name": "register",
         "Type": "LumakaStickerQuestBackend.Classes.FeRegister",
-        "IsRequired": true
-      },
-      {
-        "Name": "register",
-        "Type": "",
         "IsRequired": true
       }
     ],

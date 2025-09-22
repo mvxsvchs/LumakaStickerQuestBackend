@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LumakaStickerQuestBackend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bd6a3171d57ad0260de91c688cd111765a5917a4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bc747ab1a8aedcffb331f6dc737eb786be2a78f5")]
 [assembly: System.Reflection.AssemblyProductAttribute("LumakaStickerQuestBackend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LumakaStickerQuestBackend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
