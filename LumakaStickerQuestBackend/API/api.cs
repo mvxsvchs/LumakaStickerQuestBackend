@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace LumakaStickerQuestBackend.API
 {
 	[ApiController] // properties for api controllers
-	[Route("api/[controller]")]
+	[Route("api/user")]
 	public class QuestController : ControllerBase
 	{
 		private readonly Services.UserS _userService;
@@ -28,7 +28,7 @@ namespace LumakaStickerQuestBackend.API
 			return Ok(user); // HTTP 200 success & user
 		}
 
-		[HttpPut("login")]
+		[HttpPost("login")]
 		public async Task<ActionResult<FeUser>> GetUserByMailPwd([FromBody] FeLogin login)
 		{
 			if (!ModelState.IsValid || login == null)
