@@ -28,7 +28,7 @@ namespace LumakaStickerQuestBackend.API
 			return Ok(user); // HTTP 200 success & user
 		}
 
-		[HttpPost("login/{login}")]
+		[HttpPut("login/{login}")]
 		public async Task<ActionResult<FeUser>> GetUserByMailPwd(FeLogin login)
 		{
 			var user = await _userService.GetByMailAndPwd(login.Mail, login.Password);
