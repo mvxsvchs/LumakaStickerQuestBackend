@@ -54,7 +54,7 @@ namespace LumakaStickerQuestBackend.Functions
 				}
 			}
 
-			public async Task<User> GetByMailAndPwd(string mail, string pwd)
+			public async Task<FeUser> GetByMailAndPwd(string mail, string pwd)
 			{
 				await using var conn = GetConnection();
 				await conn.OpenAsync();
@@ -72,7 +72,7 @@ namespace LumakaStickerQuestBackend.Functions
 				await using var reader = await cmd.ExecuteReaderAsync();
 				if (await reader.ReadAsync())
 				{
-					return new User
+					User tempUser = new User
 					{
 						Id = reader.GetInt32(reader.GetOrdinal("user_id")),
 						Name = reader.GetString(reader.GetOrdinal("username")),
@@ -86,6 +86,16 @@ namespace LumakaStickerQuestBackend.Functions
 							? new int[0]
 							: reader.GetFieldValue<int[]>(reader.GetOrdinal("sticker_id"))
 					};
+					
+					FeUser returnUser = new FeUser
+					{
+						UserId = tempUser.Id,
+						Username = tempUser.Name,
+						Points = tempUser.Points,
+						StickerId = tempUser.Stickers
+					};
+
+					return returnUser;
 				}
 				else
 				{
