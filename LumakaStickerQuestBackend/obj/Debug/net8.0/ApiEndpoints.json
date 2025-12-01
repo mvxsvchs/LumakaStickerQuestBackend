@@ -2,7 +2,7 @@
   {
     "ContainingType": "LumakaStickerQuestBackend.API.QuestController",
     "Method": "GetUserByID",
-    "RelativePath": "api/Quest/get/{id}",
+    "RelativePath": "api/user/get/{id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -28,8 +28,8 @@
   {
     "ContainingType": "LumakaStickerQuestBackend.API.QuestController",
     "Method": "GetUserByMailPwd",
-    "RelativePath": "api/Quest/login",
-    "HttpMethod": "PUT",
+    "RelativePath": "api/user/login",
+    "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
@@ -54,7 +54,7 @@
   {
     "ContainingType": "LumakaStickerQuestBackend.API.QuestController",
     "Method": "RegisterNewUser",
-    "RelativePath": "api/Quest/register",
+    "RelativePath": "api/user/register",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
