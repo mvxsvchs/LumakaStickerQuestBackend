@@ -76,8 +76,8 @@ namespace LumakaStickerQuestBackend.Functions
 				";
 
 				await using var cmd = new NpgsqlCommand(sql, conn);
-				cmd.Parameters.AddWithValue("mail", mail.ToLower);
-				cmd.Parameters.AddWithValue("pwd", pwd);
+				cmd.Parameters.AddWithValue("@mail", mail.ToLowerInvariant());
+				cmd.Parameters.AddWithValue("@pwd", pwd);
 
 				await using var reader = await cmd.ExecuteReaderAsync();
 				if (await reader.ReadAsync())
@@ -126,9 +126,9 @@ namespace LumakaStickerQuestBackend.Functions
 				try
 				{
 					await using var cmd = new NpgsqlCommand(sql, conn);
-					cmd.Parameters.AddWithValue("username", user.Username);
-					cmd.Parameters.AddWithValue("email", user.Mail.ToLower);
-					cmd.Parameters.AddWithValue("password_hash", user.Password);
+					cmd.Parameters.AddWithValue("@username", user.Username);
+					cmd.Parameters.AddWithValue("@email", user.Mail.ToLowerInvariant());
+					cmd.Parameters.AddWithValue("@password_hash", user.Password);
 
 					int rowsAffected = await cmd.ExecuteNonQueryAsync();
 					return rowsAffected == 1;
