@@ -16,7 +16,7 @@ namespace LumakaStickerQuestBackend.Functions
 		// Functions for operations related to users
 		public class UserS
 		{
-			public async Task<FeUser> GetById(int id)
+			public async Task<FeUser?> GetById(int id)
 			{
 				await using var conn = GetConnection();
 				await conn.OpenAsync();
@@ -64,7 +64,7 @@ namespace LumakaStickerQuestBackend.Functions
 				}
 			}
 
-			public async Task<FeUser> GetByMailAndPwd(string mail, string pwd)
+			public async Task<FeUser?> GetByMailAndPwd(string mail, string pwd)
 			{
 				await using var conn = GetConnection();
 				await conn.OpenAsync();
@@ -76,7 +76,7 @@ namespace LumakaStickerQuestBackend.Functions
 				";
 
 				await using var cmd = new NpgsqlCommand(sql, conn);
-				cmd.Parameters.AddWithValue("mail", mail.ToLower);
+				cmd.Parameters.AddWithValue("mail", mail.ToLower());
 				cmd.Parameters.AddWithValue("pwd", pwd);
 
 				await using var reader = await cmd.ExecuteReaderAsync();
@@ -127,7 +127,7 @@ namespace LumakaStickerQuestBackend.Functions
 				{
 					await using var cmd = new NpgsqlCommand(sql, conn);
 					cmd.Parameters.AddWithValue("username", user.Username);
-					cmd.Parameters.AddWithValue("email", user.Mail.ToLower);
+					cmd.Parameters.AddWithValue("email", user.Mail.ToLower());
 					cmd.Parameters.AddWithValue("password_hash", user.Password);
 
 					int rowsAffected = await cmd.ExecuteNonQueryAsync();
