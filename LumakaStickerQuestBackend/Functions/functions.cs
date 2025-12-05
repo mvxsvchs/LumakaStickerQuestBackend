@@ -152,6 +152,7 @@ namespace LumakaStickerQuestBackend.Functions
 				try
 				{
 					await using var cmd = new NpgsqlCommand(sql, conn);
+					cmd.Parameters.AddWithValue("user_id", id);
 
 					int rowsAffected = await cmd.ExecuteNonQueryAsync();
 					return rowsAffected == 1; // i want to add validation here, but db connection currently fails
