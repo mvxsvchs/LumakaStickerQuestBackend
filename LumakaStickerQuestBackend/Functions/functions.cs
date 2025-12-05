@@ -162,13 +162,34 @@ namespace LumakaStickerQuestBackend.Functions
 					return false;
 				}
 			}
-					cmd.Parameters.AddWithValue("user_id", id);
+
+			public async Task<bool> UpdateUser(User user)
+			{
+				await using var conn = GetConnection();
+				await conn.OpenAsync();
+
+				var sql = @"
+					UPDATE users
+					SET username = @name email = @mail birth_date = @birthdate password_hash = @pwd points = @points sticker_id = @stickers
+					WHERE user_id = @id
+				";
+
+				try
+				{
+					await using var cmd = new NpgsqlCommand(sql,conn);
+					cmd.Parameters.AddWithValue("id", user.Id);
+					cmd.Parameters.AddWithValue("name", user.Name);
+					cmd.Parameters.AddWithValue("mail", user.Email);
+					cmd.Parameters.AddWithValue("birthdate", user.Birthday);
+					cmd.Parameters.AddWithValue("pwd", user.Password);
+					cmd.Parameters.AddWithValue("points", user.Points);
+					cmd.Parameters.AddWithValue("stickers", user.Stickers);
 
 					int rowsAffected = await cmd.ExecuteNonQueryAsync();
-					return rowsAffected == 1; // i want to add validation here, but db connection currently fails
+					return rowsAffected == 1;
 				}
 				catch
-				{ 
+				{
 					return false;
 				}
 			}
