@@ -138,6 +138,29 @@ namespace LumakaStickerQuestBackend.Functions
 					return false;
 				}
 			}
+
+			public async Task<bool> DeleteUser(int id)
+			{
+				await using var conn = GetConnection();
+				await conn.OpenAsync();
+
+				var sql = @"
+					DELETE FROM users
+					WHERE user_id = @id
+				";
+
+				try
+				{
+					await using var cmd = new NpgsqlCommand(sql, conn);
+
+					int rowsAffected = await cmd.ExecuteNonQueryAsync();
+					return rowsAffected == 1; // i want to add validation here, but db connection currently fails
+				}
+				catch
+				{ 
+					return false;
+				}
+			}
 		}
 		/*
 		// Functions for operations related to lists
