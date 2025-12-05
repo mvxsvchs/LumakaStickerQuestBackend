@@ -194,14 +194,38 @@ namespace LumakaStickerQuestBackend.Functions
 				}
 			}
 		}
-		/*
+		
 		// Functions for operations related to lists
 		public class ListS
 		{
-			public async Task<ListItem> GetListItem(int listId)
+			public async Task<bool> AddTask(ListItem task) //this should hand back the taks id so the frontend can call with that -> speak with maxi
 			{
-				await Placeholder2;
+				await using var conn = GetConnection();
+				await conn.OpenAsync();
+
+				var sql = @"
+					INSERT INTO user_tasks (user_id, task_description, category_id, points_reward, is_completed, position)
+					VALUES (@userid, @desc, @catid, @pointrew, @complete, @pos);
+				";
+
+				try
+				{
+					await using var cmd = new NpgsqlCommand(sql, conn);
+					cmd.Parameters.AddWithValue("userid", task.UserId);
+					cmd.Parameters.AddWithValue("desc", task.Description);
+					cmd.Parameters.AddWithValue("catid", task.Category);
+					cmd.Parameters.AddWithValue("pointrew", task.Points);
+					cmd.Parameters.AddWithValue("complete", false);
+					cmd.Parameters.AddWithValue("pos", task.Position);
+
+					int rowsAffected = await cmd.ExecuteNonQueryAsync();
+					return rowsAffected == 1;
+				}
+				catch
+				{
+					return false;
+				}
 			}
-		}*/
+		}
 	}
 }
