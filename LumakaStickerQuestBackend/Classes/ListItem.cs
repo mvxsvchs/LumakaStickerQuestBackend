@@ -12,7 +12,7 @@ namespace LumakaStickerQuestBackend.Classes
 		public int Position { get; set; }
 		public string Description { get; set; }
 		public int Category {  get; set; }
-		public bool CheckBox { get; set; }
+		public bool IsCompleted { get; set; }
 		public int Points { get; set; }
 	}
 }
