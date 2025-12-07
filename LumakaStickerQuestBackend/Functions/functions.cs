@@ -151,10 +151,10 @@ namespace LumakaStickerQuestBackend.Functions
                 }
             }
 
-            public async Task<bool> UpdateUser(User user)
-            {
-                await using var conn = GetConnection();
-                await conn.OpenAsync();
+			public async Task<bool> UpdateUser(User user)
+			{
+				await using var conn = GetConnection();
+				await conn.OpenAsync();
 
                 var updatePassword = !string.IsNullOrWhiteSpace(user.Password);
                 var sql = updatePassword
@@ -196,16 +196,44 @@ namespace LumakaStickerQuestBackend.Functions
                     }
 
                     int rowsAffected = await cmd.ExecuteNonQueryAsync();
-                    return rowsAffected == 1;
-                }
-                catch
-                {
-                    return false;
-                }
-            }
-        }
+					return rowsAffected == 1;
+				}
+				catch
+				{
+					return false;
+				}
+			}
 
-        // Functions for operations related to lists
+			public async Task<bool> UpdateStickers(int userId, int[] stickers)
+			{
+				await using var conn = GetConnection();
+				await conn.OpenAsync();
+
+				var sql = @"
+					UPDATE users
+					SET sticker_id = @stickers,
+						points = GREATEST(points - 10, 0)
+					WHERE user_id = @id
+					RETURNING points
+				";
+
+				try
+				{
+					await using var cmd = new NpgsqlCommand(sql, conn);
+					cmd.Parameters.AddWithValue("id", userId);
+					cmd.Parameters.AddWithValue("stickers", stickers ?? Array.Empty<int>());
+
+					var result = await cmd.ExecuteScalarAsync();
+					return result != null;
+				}
+				catch
+				{
+					return false;
+				}
+			}
+		}
+		
+		// Functions for operations related to lists
         public class ListS
         {
             public async Task<int?> AddTask(TaskCreateRequest task)

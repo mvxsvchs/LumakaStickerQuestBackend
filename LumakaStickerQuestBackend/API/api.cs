@@ -61,5 +61,22 @@ namespace LumakaStickerQuestBackend.API
 			
 			return BadRequest();
 		}
+
+		[HttpPut("{id}/stickers")]
+		public async Task<IActionResult> UpdateUserStickers(int id, [FromBody] UpdateStickersRequest request)
+		{
+			if (request == null || request.stickers == null)
+			{
+				return BadRequest();
+			}
+
+			var success = await _userService.UpdateStickers(id, request.stickers);
+			if (!success)
+			{
+				return NotFound();
+			}
+
+			return NoContent();
+		}
 	}
 }
