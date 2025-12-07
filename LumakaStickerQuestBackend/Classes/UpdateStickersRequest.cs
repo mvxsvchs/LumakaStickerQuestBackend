@@ -1,7 +1,11 @@
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
+
 namespace LumakaStickerQuestBackend.Classes
 {
 	public class UpdateStickersRequest
 	{
-		public int[] stickers { get; set; }
+		[JsonPropertyName("stickers")]
+		public List<int> stickers { get; set; }
 	}
 }

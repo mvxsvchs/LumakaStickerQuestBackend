@@ -2,6 +2,7 @@ using LumakaStickerQuestBackend.Functions;
 using LumakaStickerQuestBackend.Classes;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace LumakaStickerQuestBackend.API
 {
@@ -15,6 +16,18 @@ namespace LumakaStickerQuestBackend.API
 		public QuestController(Services.UserS userService)
 		{
 			_userService = userService;
+		}
+
+		[HttpGet("{id:int}")]
+		public async Task<ActionResult<FeUser>> GetUser(int id)
+		{
+			var user = await _userService.GetById(id);
+			if (user == null)
+			{
+				return NotFound();
+			}
+
+			return Ok(user);
 		}
 
 		[HttpGet("get/{id}")]
@@ -70,13 +83,30 @@ namespace LumakaStickerQuestBackend.API
 				return BadRequest();
 			}
 
-			var success = await _userService.UpdateStickers(id, request.stickers);
+			var success = await _userService.UpdateStickers(id, request.stickers.ToArray());
 			if (!success)
 			{
 				return NotFound();
 			}
 
 			return NoContent();
+		}
+
+		[HttpPost("points")]
+		public async Task<ActionResult<object>> UpdatePoints([FromBody] PointsDto request)
+		{
+			if (request == null || request.UserId <= 0)
+			{
+				return BadRequest();
+			}
+
+			var newPoints = await _userService.UpdateUserPoints(request.UserId, request.Points);
+			if (newPoints == null)
+			{
+				return NotFound();
+			}
+
+			return Ok(new { user_points = newPoints.Value });
 		}
 	}
 }

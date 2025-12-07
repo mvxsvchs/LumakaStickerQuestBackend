@@ -24,14 +24,14 @@ namespace LumakaStickerQuestBackend.Functions
                     ? Array.Empty<int>()
                     : reader.GetFieldValue<int[]>(stickerOrdinal);
 
-                return new FeUser
-                {
-                    UserId = reader.GetInt32(reader.GetOrdinal("user_id")),
-                    Username = reader.GetString(reader.GetOrdinal("username")),
-                    Points = reader.GetInt32(reader.GetOrdinal("points")),
-                    StickerId = stickerIds
-                };
-            }
+				return new FeUser
+				{
+					UserId = reader.GetInt32(reader.GetOrdinal("user_id")),
+					Username = reader.GetString(reader.GetOrdinal("username")),
+					Points = reader.GetInt32(reader.GetOrdinal("points")),
+					Stickers = stickerIds
+				};
+			}
 
             public async Task<FeUser?> GetById(int id)
             {
@@ -231,6 +231,33 @@ namespace LumakaStickerQuestBackend.Functions
 					return false;
 				}
 			}
+
+			public async Task<int?> UpdateUserPoints(int userId, int delta)
+			{
+				await using var conn = GetConnection();
+				await conn.OpenAsync();
+
+				var sql = @"
+					UPDATE users
+					SET points = GREATEST(points + @delta, 0)
+					WHERE user_id = @id
+					RETURNING points
+				";
+
+				try
+				{
+					await using var cmd = new NpgsqlCommand(sql, conn);
+					cmd.Parameters.AddWithValue("id", userId);
+					cmd.Parameters.AddWithValue("delta", delta);
+
+					var result = await cmd.ExecuteScalarAsync();
+					return result is int points ? points : null;
+				}
+				catch
+				{
+					return null;
+				}
+			}
 		}
 		
 		// Functions for operations related to lists
@@ -333,82 +360,81 @@ namespace LumakaStickerQuestBackend.Functions
                 await conn.OpenAsync();
                 await using var transaction = await conn.BeginTransactionAsync();
 
-                try
-                {
-                    // Load task info and current completion flag
-                    var selectSql = @"
-						SELECT user_id, is_completed, points_reward
+				try
+				{
+					// Load task info and current completion flag
+					var selectSql = @"
+						SELECT user_id, is_completed
 						FROM user_tasks
 						WHERE task_id = @taskid
 						FOR UPDATE
 					";
-                    int userId;
-                    bool previousCompleted;
-                    int pointsReward;
+					int userId;
+					bool previousCompleted;
 
-                    await using (var selectCmd = new NpgsqlCommand(selectSql, conn, transaction))
-                    {
-                        selectCmd.Parameters.AddWithValue("taskid", taskId);
-                        await using var reader = await selectCmd.ExecuteReaderAsync();
-                        if (!await reader.ReadAsync())
-                        {
-                            return null;
-                        }
+					await using (var selectCmd = new NpgsqlCommand(selectSql, conn, transaction))
+					{
+						selectCmd.Parameters.AddWithValue("taskid", taskId);
+						await using var reader = await selectCmd.ExecuteReaderAsync();
+						if (!await reader.ReadAsync())
+						{
+							return null;
+						}
 
-                        userId = reader.GetInt32(reader.GetOrdinal("user_id"));
-                        previousCompleted = reader.GetBoolean(reader.GetOrdinal("is_completed"));
-                        pointsReward = reader.GetInt32(reader.GetOrdinal("points_reward"));
-                    }
+						userId = reader.GetInt32(reader.GetOrdinal("user_id"));
+						previousCompleted = reader.GetBoolean(reader.GetOrdinal("is_completed"));
+					}
 
-                    // Update completion state
-                    var updateTaskSql = @"
+					// Update completion state
+					var updateTaskSql = @"
 						UPDATE user_tasks
 						SET is_completed = @completed
 						WHERE task_id = @taskid
 					";
-                    await using (var updateTaskCmd = new NpgsqlCommand(updateTaskSql, conn, transaction))
-                    {
-                        updateTaskCmd.Parameters.AddWithValue("completed", isCompleted);
-                        updateTaskCmd.Parameters.AddWithValue("taskid", taskId);
-                        await updateTaskCmd.ExecuteNonQueryAsync();
-                    }
+					await using (var updateTaskCmd = new NpgsqlCommand(updateTaskSql, conn, transaction))
+					{
+						updateTaskCmd.Parameters.AddWithValue("completed", isCompleted);
+						updateTaskCmd.Parameters.AddWithValue("taskid", taskId);
+						await updateTaskCmd.ExecuteNonQueryAsync();
+					}
 
-                    // Adjust user points when the completion flag changes
-                    int delta = 0;
-                    if (isCompleted && !previousCompleted)
-                    {
-                        delta = pointsReward;
-                    }
-                    else if (!isCompleted && previousCompleted)
-                    {
-                        delta = -pointsReward;
-                    }
+					// Adjust user points when the completion flag changes (fixed at +/-5)
+					int delta = 0;
+					const int reward = 5;
+					if (isCompleted && !previousCompleted)
+					{
+						delta = reward;
+					}
+					else if (!isCompleted && previousCompleted)
+					{
+						delta = -reward;
+					}
 
-                    int newPoints;
-                    var updateUserSql = @"
+					int newPoints;
+					var updateUserSql = @"
 						UPDATE users
 						SET points = GREATEST(points + @delta, 0)
 						WHERE user_id = @userid
 						RETURNING points
 					";
 
-                    await using (var updateUserCmd = new NpgsqlCommand(updateUserSql, conn, transaction))
-                    {
-                        updateUserCmd.Parameters.AddWithValue("delta", delta);
-                        updateUserCmd.Parameters.AddWithValue("userid", userId);
-                        var result = await updateUserCmd.ExecuteScalarAsync();
-                        newPoints = result is int points ? points : 0;
-                    }
+					await using (var updateUserCmd = new NpgsqlCommand(updateUserSql, conn, transaction))
+					{
+						updateUserCmd.Parameters.AddWithValue("delta", delta);
+						updateUserCmd.Parameters.AddWithValue("userid", userId);
+						var result = await updateUserCmd.ExecuteScalarAsync();
+						newPoints = result is int points ? points : 0;
+					}
 
-                    await transaction.CommitAsync();
-                    return newPoints;
-                }
-                catch
-                {
-                    await transaction.RollbackAsync();
-                    return null;
-                }
-            }
+					await transaction.CommitAsync();
+					return newPoints;
+				}
+				catch
+				{
+					await transaction.RollbackAsync();
+					return null;
+				}
+			}
         }
     }
 }
