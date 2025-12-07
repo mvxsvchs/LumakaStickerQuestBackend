@@ -1,5 +1,6 @@
 using LumakaStickerQuestBackend.Classes;
 using Npgsql;
+using System.Globalization;
 
 
 namespace LumakaStickerQuestBackend.Functions
@@ -16,6 +17,22 @@ namespace LumakaStickerQuestBackend.Functions
 		// Functions for operations related to users
 		public class UserS
 		{
+			private static FeUser MapReaderToFeUser(NpgsqlDataReader reader)
+			{
+				var stickerOrdinal = reader.GetOrdinal("sticker_id");
+				var stickerIds = reader.IsDBNull(stickerOrdinal)
+					? Array.Empty<int>()
+					: reader.GetFieldValue<int[]>(stickerOrdinal);
+
+				return new FeUser
+				{
+					UserId = reader.GetInt32(reader.GetOrdinal("user_id")),
+					Username = reader.GetString(reader.GetOrdinal("username")),
+					Points = reader.GetInt32(reader.GetOrdinal("points")),
+					StickerId = stickerIds
+				};
+			}
+
 			public async Task<FeUser?> GetById(int id)
 			{
 				await using var conn = GetConnection();
@@ -31,90 +48,57 @@ namespace LumakaStickerQuestBackend.Functions
 				cmd.Parameters.AddWithValue("id", id);
 
 				await using var reader = await cmd.ExecuteReaderAsync();
-				if (await reader.ReadAsync())
-				{
-					User tempUser = new User
-					{
-						Id = reader.GetInt32(reader.GetOrdinal("user_id")),
-						Name = reader.GetString(reader.GetOrdinal("username")),
-						Password = reader.GetString(reader.GetOrdinal("password_hash")),
-						Email = reader.GetString(reader.GetOrdinal("email")),
-						Points = reader.GetInt32(reader.GetOrdinal("points")),
-						Birthday = reader.IsDBNull(reader.GetOrdinal("birth_date"))
-							? null
-							: reader.GetDateTime(reader.GetOrdinal("birth_date")).ToString("yyyy-MM-dd"),
-						Stickers = reader.IsDBNull(reader.GetOrdinal("sticker_id"))
-							? new int[0]
-							: reader.GetFieldValue<int[]>(reader.GetOrdinal("sticker_id"))
-					};
-
-					FeUser returnUser = new FeUser
-					{
-						UserId = tempUser.Id,
-						Username = tempUser.Name,
-						Points = tempUser.Points,
-						StickerId = tempUser.Stickers
-					};
-
-					return returnUser;
-				}
-				else 
-				{
-					return null;
-				}
+				return await reader.ReadAsync()
+					? MapReaderToFeUser(reader)
+					: null;
 			}
 
 			public async Task<FeUser?> GetByMailAndPwd(string mail, string pwd)
 			{
+				if (string.IsNullOrWhiteSpace(mail) || string.IsNullOrWhiteSpace(pwd))
+				{
+					return null;
+				}
+
 				await using var conn = GetConnection();
 				await conn.OpenAsync();
 
 				var sql = @"
 					SELECT user_id, username, password_hash, email, points, birth_date, sticker_id
 					FROM users
-					WHERE email = @mail AND password_hash = @pwd
+					WHERE email = @mail
 				";
 
 				await using var cmd = new NpgsqlCommand(sql, conn);
 				cmd.Parameters.AddWithValue("mail", mail.ToLower());
-				cmd.Parameters.AddWithValue("pwd", pwd);
 
 				await using var reader = await cmd.ExecuteReaderAsync();
-				if (await reader.ReadAsync())
-				{
-					User tempUser = new User
-					{
-						Id = reader.GetInt32(reader.GetOrdinal("user_id")),
-						Name = reader.GetString(reader.GetOrdinal("username")),
-						Password = reader.GetString(reader.GetOrdinal("password_hash")),
-						Email = reader.GetString(reader.GetOrdinal("email")),
-						Points = reader.GetInt32(reader.GetOrdinal("points")),
-						Birthday = reader.IsDBNull(reader.GetOrdinal("birth_date"))
-							? null
-							: reader.GetDateTime(reader.GetOrdinal("birth_date")).ToString("yyyy-MM-dd"),
-						Stickers = reader.IsDBNull(reader.GetOrdinal("sticker_id"))
-							? new int[0]
-							: reader.GetFieldValue<int[]>(reader.GetOrdinal("sticker_id"))
-					};
-					
-					FeUser returnUser = new FeUser
-					{
-						UserId = tempUser.Id,
-						Username = tempUser.Name,
-						Points = tempUser.Points,
-						StickerId = tempUser.Stickers
-					};
-
-					return returnUser;
-				}
-				else
+				if (!await reader.ReadAsync())
 				{
 					return null;
 				}
+
+				var storedHash = reader.GetString(reader.GetOrdinal("password_hash"));
+				var isValid = PasswordHasher.Verify(pwd, storedHash);
+
+				if (!isValid)
+				{
+					return null;
+				}
+
+				return MapReaderToFeUser(reader);
 			}
 
 			public async Task<bool> RegisterUser(FeRegister user)
 			{
+				if (user == null
+				    || string.IsNullOrWhiteSpace(user.Username)
+				    || string.IsNullOrWhiteSpace(user.Mail)
+				    || string.IsNullOrWhiteSpace(user.Password))
+				{
+					return false;
+				}
+
 				await using var conn = GetConnection();
 				await conn.OpenAsync();
 
@@ -125,10 +109,12 @@ namespace LumakaStickerQuestBackend.Functions
 
 				try
 				{
+					var hashedPassword = PasswordHasher.Hash(user.Password);
+
 					await using var cmd = new NpgsqlCommand(sql, conn);
 					cmd.Parameters.AddWithValue("username", user.Username);
 					cmd.Parameters.AddWithValue("email", user.Mail.ToLower());
-					cmd.Parameters.AddWithValue("password_hash", user.Password);
+					cmd.Parameters.AddWithValue("password_hash", hashedPassword);
 
 					int rowsAffected = await cmd.ExecuteNonQueryAsync();
 					return rowsAffected == 1;
@@ -168,11 +154,18 @@ namespace LumakaStickerQuestBackend.Functions
 				await using var conn = GetConnection();
 				await conn.OpenAsync();
 
-				var sql = @"
-					UPDATE users
-					SET username = @name email = @mail birth_date = @birthdate password_hash = @pwd points = @points sticker_id = @stickers
-					WHERE user_id = @id
-				";
+				var updatePassword = !string.IsNullOrWhiteSpace(user.Password);
+				var sql = updatePassword
+					? @"
+						UPDATE users
+						SET username = @name, email = @mail, birth_date = @birthdate, points = @points, sticker_id = @stickers, password_hash = @pwd
+						WHERE user_id = @id
+					"
+					: @"
+						UPDATE users
+						SET username = @name, email = @mail, birth_date = @birthdate, points = @points, sticker_id = @stickers
+						WHERE user_id = @id
+					";
 
 				try
 				{
@@ -180,10 +173,23 @@ namespace LumakaStickerQuestBackend.Functions
 					cmd.Parameters.AddWithValue("id", user.Id);
 					cmd.Parameters.AddWithValue("name", user.Name);
 					cmd.Parameters.AddWithValue("mail", user.Email);
-					cmd.Parameters.AddWithValue("birthdate", user.Birthday);
-					cmd.Parameters.AddWithValue("pwd", user.Password);
+
+					DateTime? birthdate = null;
+					if (!string.IsNullOrWhiteSpace(user.Birthday) &&
+					    DateTime.TryParse(user.Birthday, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate))
+					{
+						birthdate = parsedDate;
+					}
+					cmd.Parameters.AddWithValue("birthdate", birthdate.HasValue ? birthdate.Value : DBNull.Value);
+
 					cmd.Parameters.AddWithValue("points", user.Points);
-					cmd.Parameters.AddWithValue("stickers", user.Stickers);
+					cmd.Parameters.AddWithValue("stickers", user.Stickers ?? Array.Empty<int>());
+					
+					if (updatePassword)
+					{
+						var hashedPassword = PasswordHasher.Hash(user.Password);
+						cmd.Parameters.AddWithValue("pwd", hashedPassword);
+					}
 
 					int rowsAffected = await cmd.ExecuteNonQueryAsync();
 					return rowsAffected == 1;
