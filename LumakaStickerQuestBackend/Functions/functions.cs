@@ -599,8 +599,8 @@ namespace LumakaStickerQuestBackend.Functions
 				try
 				{
 					await using var cmd = new NpgsqlCommand(sql, conn);
-					cmd.Parameters.AddWithValue("user_id", board.UserId);
-					cmd.Parameters.AddWithValue("board_id", board.Id);
+					cmd.Parameters.AddWithValue("userId", board.UserId);
+					cmd.Parameters.AddWithValue("boardId", board.Id);
 					cmd.Parameters.AddWithValue("completed", board.IsCompleted);
 
 					int rowsAffected = await cmd.ExecuteNonQueryAsync();
