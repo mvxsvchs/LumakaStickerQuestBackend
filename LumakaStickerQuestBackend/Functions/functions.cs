@@ -512,6 +512,44 @@ namespace LumakaStickerQuestBackend.Functions
 					return null;
 				}
 			}
+
+			public async Task<bool> AddBoard(int userId)
+			{
+				if(userId == null || userId < 1)
+				{
+					return false;
+				}
+
+				await using var conn = GetConnection();
+				await conn.OpenAsync();
+
+				var sql = @"
+					INSERT INTO bingo_boards (user_id, is_completed)
+					VALUES (@userId, @completed);
+				";
+
+				try
+				{
+					await using var cmd = new NpgsqlCommand(sql, conn);
+					cmd.Parameters.AddWithValue("userId", userId);
+					cmd.Parameters.AddWithValue("completed", false);
+
+					int rowsAffected = await cmd.ExecuteNonQueryAsync();
+					if(rowsAffected == 1)
+					{
+						var tempBoard = GetBoard(userId);
+						if (await AddField(tempBoard.Id) != false) 
+						{
+							return true;
+						}
+					}
+					return false;
+				}
+				catch
+				{
+					return false;
+				}
+			}
 		}
     }
 }
