@@ -582,6 +582,16 @@ namespace LumakaStickerQuestBackend.Functions
 					return false;
 				}
 			}
+
+			public async Task<bool> UpdateBoard(Board board)
+			{
+				return false;
+			}
+
+			public async Task<bool> UpdateField(Field field)
+			{
+				return false;
+			}
 		}
     }
 }
