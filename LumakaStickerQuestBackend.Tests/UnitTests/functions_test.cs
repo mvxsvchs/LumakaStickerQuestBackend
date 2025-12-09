@@ -6,21 +6,11 @@ using LumakaStickerQuestBackend.Classes;
 
 namespace LumakaStickerQuestBackend.Tests
 {
-    // Dummytest
-    public class DummyTests
-    {
-        [Fact]
-        public void Addition_isCorrect()
-        {
-            Assert.Equal(4, 2 + 2);
-        }
-    }
-
     // UserS-tests
     public class FunctionTests
     {
         // 1. GetById
-        [fact]
+        [Fact]
         public async Task GetById_ReturnsNull_ForInvalidId()
         {
             var userService = new Services.UserS();
@@ -29,7 +19,7 @@ namespace LumakaStickerQuestBackend.Tests
         }
 
         // 2. GetByMailAndPwd
-        [fact]
+        [Fact]
         public async Task GetByMailAndPwd_ReturnsNull_WhenWrongPwd()
         {
             var userService = new Services.UserS();
@@ -38,7 +28,7 @@ namespace LumakaStickerQuestBackend.Tests
         }
 
         // 3. RegisterUser
-        [fact]
+        [Fact]
         public async Task RegisterUser_ReturnsFalse_ForInvalidUser()
         {
             var userService = new Services.UserS();
