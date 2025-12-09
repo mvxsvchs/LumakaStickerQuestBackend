@@ -2,7 +2,7 @@ using Xunit; // xUnit Framework importieren
 using System.Threading.Tasks;
 using LumakaStickerQuestBackend.Functions;
 using LumakaStickerQuestBackend.Classes;
-
+using Xunit;
 
 namespace LumakaStickerQuestBackend.Tests
 {
@@ -42,6 +42,18 @@ namespace LumakaStickerQuestBackend.Tests
             Assert.False(result);
         }
 
-    }
+			Assert.True(PasswordHasher.Verify(password, hash));
+		}
 
+		[Fact]
+		public void Verify_FailsForWrongPassword()
+		{
+			const string password = "correct-horse-battery-staple";
+			const string wrongPassword = "Tr0ub4dor&3";
+
+			var hash = PasswordHasher.Hash(password);
+
+			Assert.False(PasswordHasher.Verify(wrongPassword, hash));
+		}
+	}
 }

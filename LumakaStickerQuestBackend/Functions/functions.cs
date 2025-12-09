@@ -1,136 +1,201 @@
 using LumakaStickerQuestBackend.Classes;
 using Npgsql;
+using System.Globalization;
 
 
 namespace LumakaStickerQuestBackend.Functions
 {
-	public class Services
-	{
-		// Overarching function to get a new connection to the DB
-		public static NpgsqlConnection GetConnection()
-		{
-			string connStr = ConfigurationHelper.GetConnectionString("DefaultConnection");
-			return new NpgsqlConnection(connStr);
-		}
+    public class Services
+    {
+        // Overarching function to get a new connection to the DB
+        public static NpgsqlConnection GetConnection()
+        {
+            string connStr = ConfigurationHelper.GetConnectionString("DefaultConnection");
+            return new NpgsqlConnection(connStr);
+        }
 
-		// Functions for operations related to users
-		public class UserS
-		{
-			public async Task<FeUser?> GetById(int id)
-			{
-				await using var conn = GetConnection();
-				await conn.OpenAsync();
+        // Functions for operations related to users
+        public class UserS
+        {
+            private static UserDto MapReaderToFeUser(NpgsqlDataReader reader)
+            {
+                var stickerOrdinal = reader.GetOrdinal("sticker_id");
+                var stickerIds = reader.IsDBNull(stickerOrdinal)
+                    ? Array.Empty<int>()
+                    : reader.GetFieldValue<int[]>(stickerOrdinal);
 
-				var sql = @"
+				return new UserDto
+				{
+					UserId = reader.GetInt32(reader.GetOrdinal("user_id")),
+					Username = reader.GetString(reader.GetOrdinal("username")),
+					Points = reader.GetInt32(reader.GetOrdinal("points")),
+					Stickers = stickerIds
+				};
+			}
+
+            public async Task<UserDto?> GetById(int id)
+            {
+                await using var conn = GetConnection();
+                await conn.OpenAsync();
+
+                var sql = @"
 					SELECT user_id, username, password_hash, email, points, birth_date, sticker_id
 					FROM users
 					WHERE user_id = @id
 				";
 
-				await using var cmd = new NpgsqlCommand(sql, conn);
-				cmd.Parameters.AddWithValue("id", id);
+                await using var cmd = new NpgsqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("id", id);
 
-				await using var reader = await cmd.ExecuteReaderAsync();
-				if (await reader.ReadAsync())
-				{
-					User tempUser = new User
-					{
-						Id = reader.GetInt32(reader.GetOrdinal("user_id")),
-						Name = reader.GetString(reader.GetOrdinal("username")),
-						Password = reader.GetString(reader.GetOrdinal("password_hash")),
-						Email = reader.GetString(reader.GetOrdinal("email")),
-						Points = reader.GetInt32(reader.GetOrdinal("points")),
-						Birthday = reader.IsDBNull(reader.GetOrdinal("birth_date"))
-							? null
-							: reader.GetDateTime(reader.GetOrdinal("birth_date")).ToString("yyyy-MM-dd"),
-						Stickers = reader.IsDBNull(reader.GetOrdinal("sticker_id"))
-							? new int[0]
-							: reader.GetFieldValue<int[]>(reader.GetOrdinal("sticker_id"))
-					};
+                await using var reader = await cmd.ExecuteReaderAsync();
+                return await reader.ReadAsync()
+                    ? MapReaderToFeUser(reader)
+                    : null;
+            }
 
-					FeUser returnUser = new FeUser
-					{
-						UserId = tempUser.Id,
-						Username = tempUser.Name,
-						Points = tempUser.Points,
-						StickerId = tempUser.Stickers
-					};
+            public async Task<UserDto?> GetByMailAndPwd(string mail, string pwd)
+            {
+                if (string.IsNullOrWhiteSpace(mail) || string.IsNullOrWhiteSpace(pwd))
+                {
+                    return null;
+                }
 
-					return returnUser;
-				}
-				else 
-				{
-					return null;
-				}
-			}
+                await using var conn = GetConnection();
+                await conn.OpenAsync();
 
-			public async Task<FeUser?> GetByMailAndPwd(string mail, string pwd)
-			{
-				await using var conn = GetConnection();
-				await conn.OpenAsync();
-
-				var sql = @"
+                var sql = @"
 					SELECT user_id, username, password_hash, email, points, birth_date, sticker_id
 					FROM users
-					WHERE email = @mail AND password_hash = @pwd
+					WHERE email = @mail
 				";
 
-				await using var cmd = new NpgsqlCommand(sql, conn);
-				cmd.Parameters.AddWithValue("mail", mail.ToLower());
-				cmd.Parameters.AddWithValue("pwd", pwd);
+                await using var cmd = new NpgsqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("mail", mail.ToLower());
 
-				await using var reader = await cmd.ExecuteReaderAsync();
-				if (await reader.ReadAsync())
-				{
-					User tempUser = new User
-					{
-						Id = reader.GetInt32(reader.GetOrdinal("user_id")),
-						Name = reader.GetString(reader.GetOrdinal("username")),
-						Password = reader.GetString(reader.GetOrdinal("password_hash")),
-						Email = reader.GetString(reader.GetOrdinal("email")),
-						Points = reader.GetInt32(reader.GetOrdinal("points")),
-						Birthday = reader.IsDBNull(reader.GetOrdinal("birth_date"))
-							? null
-							: reader.GetDateTime(reader.GetOrdinal("birth_date")).ToString("yyyy-MM-dd"),
-						Stickers = reader.IsDBNull(reader.GetOrdinal("sticker_id"))
-							? new int[0]
-							: reader.GetFieldValue<int[]>(reader.GetOrdinal("sticker_id"))
-					};
-					
-					FeUser returnUser = new FeUser
-					{
-						UserId = tempUser.Id,
-						Username = tempUser.Name,
-						Points = tempUser.Points,
-						StickerId = tempUser.Stickers
-					};
+                await using var reader = await cmd.ExecuteReaderAsync();
+                if (!await reader.ReadAsync())
+                {
+                    return null;
+                }
 
-					return returnUser;
-				}
-				else
-				{
-					return null;
-				}
-			}
+                var storedHash = reader.GetString(reader.GetOrdinal("password_hash"));
+                var isValid = PasswordHasher.Verify(pwd, storedHash);
 
-			public async Task<bool> RegisterUser(FeRegister user)
-			{
-				await using var conn = GetConnection();
-				await conn.OpenAsync();
+                if (!isValid)
+                {
+                    return null;
+                }
 
-				var sql = @"
+                return MapReaderToFeUser(reader);
+            }
+
+            public async Task<bool> RegisterUser(RegisterDto user)
+            {
+                if (user == null
+                    || string.IsNullOrWhiteSpace(user.Username)
+                    || string.IsNullOrWhiteSpace(user.Mail)
+                    || string.IsNullOrWhiteSpace(user.Password))
+                {
+                    return false;
+                }
+
+                await using var conn = GetConnection();
+                await conn.OpenAsync();
+
+                var sql = @"
 					INSERT INTO users (username, email, password_hash)
 					VALUES (@username, @email, @password_hash);
 				";
 
-				try
-				{
-					await using var cmd = new NpgsqlCommand(sql, conn);
-					cmd.Parameters.AddWithValue("username", user.Username);
-					cmd.Parameters.AddWithValue("email", user.Mail.ToLower());
-					cmd.Parameters.AddWithValue("password_hash", user.Password);
+                try
+                {
+                    var hashedPassword = PasswordHasher.Hash(user.Password);
 
-					int rowsAffected = await cmd.ExecuteNonQueryAsync();
+                    await using var cmd = new NpgsqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("username", user.Username);
+                    cmd.Parameters.AddWithValue("email", user.Mail.ToLower());
+                    cmd.Parameters.AddWithValue("password_hash", hashedPassword);
+
+                    int rowsAffected = await cmd.ExecuteNonQueryAsync();
+                    return rowsAffected == 1;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+
+            public async Task<bool> DeleteUser(int id)
+            {
+                await using var conn = GetConnection();
+                await conn.OpenAsync();
+
+                var sql = @"
+					DELETE FROM users
+					WHERE user_id = @id
+				";
+
+                try
+                {
+                    await using var cmd = new NpgsqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("id", id);
+
+                    int rowsAffected = await cmd.ExecuteNonQueryAsync();
+                    return
+                        rowsAffected ==
+                        1; // i want to add validation here, but db connection currently fails; actually this might already be validation
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+
+			public async Task<bool> UpdateUser(User user)
+			{
+				await using var conn = GetConnection();
+				await conn.OpenAsync();
+
+                var updatePassword = !string.IsNullOrWhiteSpace(user.Password);
+                var sql = updatePassword
+                    ? @"
+						UPDATE users
+						SET username = @name, email = @mail, birth_date = @birthdate, points = @points, sticker_id = @stickers, password_hash = @pwd
+						WHERE user_id = @id
+					"
+                    : @"
+						UPDATE users
+						SET username = @name, email = @mail, birth_date = @birthdate, points = @points, sticker_id = @stickers
+						WHERE user_id = @id
+					";
+
+                try
+                {
+                    await using var cmd = new NpgsqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("id", user.Id);
+                    cmd.Parameters.AddWithValue("name", user.Name);
+                    cmd.Parameters.AddWithValue("mail", user.Email);
+
+                    DateTime? birthdate = null;
+                    if (!string.IsNullOrWhiteSpace(user.Birthday) &&
+                        DateTime.TryParse(user.Birthday, CultureInfo.InvariantCulture, DateTimeStyles.None,
+                            out var parsedDate))
+                    {
+                        birthdate = parsedDate;
+                    }
+
+                    cmd.Parameters.AddWithValue("birthdate", birthdate.HasValue ? birthdate.Value : DBNull.Value);
+
+                    cmd.Parameters.AddWithValue("points", user.Points);
+                    cmd.Parameters.AddWithValue("stickers", user.Stickers ?? Array.Empty<int>());
+
+                    if (updatePassword)
+                    {
+                        var hashedPassword = PasswordHasher.Hash(user.Password);
+                        cmd.Parameters.AddWithValue("pwd", hashedPassword);
+                    }
+
+                    int rowsAffected = await cmd.ExecuteNonQueryAsync();
 					return rowsAffected == 1;
 				}
 				catch
@@ -138,15 +203,238 @@ namespace LumakaStickerQuestBackend.Functions
 					return false;
 				}
 			}
-		}
-		/*
-		// Functions for operations related to lists
-		public class ListS
-		{
-			public async Task<ListItem> GetListItem(int listId)
+
+			public async Task<bool> UpdateStickers(int userId, int[] stickers)
 			{
-				await Placeholder2;
+				await using var conn = GetConnection();
+				await conn.OpenAsync();
+
+				var sql = @"
+					UPDATE users
+					SET sticker_id = @stickers,
+						points = GREATEST(points - 10, 0)
+					WHERE user_id = @id
+					RETURNING points
+				";
+
+				try
+				{
+					await using var cmd = new NpgsqlCommand(sql, conn);
+					cmd.Parameters.AddWithValue("id", userId);
+					cmd.Parameters.AddWithValue("stickers", stickers ?? Array.Empty<int>());
+
+					var result = await cmd.ExecuteScalarAsync();
+					return result != null;
+				}
+				catch
+				{
+					return false;
+				}
 			}
-		}*/
-	}
+
+			public async Task<int?> UpdateUserPoints(int userId, int delta)
+			{
+				await using var conn = GetConnection();
+				await conn.OpenAsync();
+
+				var sql = @"
+					UPDATE users
+					SET points = GREATEST(points + @delta, 0)
+					WHERE user_id = @id
+					RETURNING points
+				";
+
+				try
+				{
+					await using var cmd = new NpgsqlCommand(sql, conn);
+					cmd.Parameters.AddWithValue("id", userId);
+					cmd.Parameters.AddWithValue("delta", delta);
+
+					var result = await cmd.ExecuteScalarAsync();
+					return result is int points ? points : null;
+				}
+				catch
+				{
+					return null;
+				}
+			}
+		}
+		
+		// Functions for operations related to lists
+        public class ListS
+        {
+            public async Task<int?> AddTask(TaskCreateRequest task)
+            {
+                await using var conn = GetConnection();
+                await conn.OpenAsync();
+
+                var sql = @"
+					INSERT INTO user_tasks (user_id, task_description, category_id, points_reward, is_completed, position)
+					VALUES (@userid, @desc, @catid, @pointrew, @complete, @pos)
+					RETURNING task_id;
+				";
+
+                try
+                {
+                    await using var cmd = new NpgsqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("userid", task.UserId);
+                    cmd.Parameters.AddWithValue("desc", task.TaskDescription);
+                    cmd.Parameters.AddWithValue("catid", task.CategoryId);
+					cmd.Parameters.AddWithValue("pointrew", task.PointsReward);
+                    cmd.Parameters.AddWithValue("complete", false);
+                    cmd.Parameters.AddWithValue("pos", task.Position);
+
+                    var result = await cmd.ExecuteScalarAsync();
+                    return result is int taskId ? taskId : null;
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+
+            public async Task<IReadOnlyCollection<TaskResponse>> GetTasksByUserId(int userId)
+            {
+                await using var conn = GetConnection();
+                await conn.OpenAsync();
+
+                var sql = @"
+					SELECT task_id, task_description, category_id, is_completed, position, points_reward
+					FROM user_tasks
+					WHERE user_id = @userid
+					ORDER BY position NULLS LAST, task_id;
+				";
+
+                var tasks = new List<TaskResponse>();
+                await using var cmd = new NpgsqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("userid", userId);
+
+                await using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    tasks.Add(new TaskResponse
+                    {
+                        TaskId = reader.GetInt32(reader.GetOrdinal("task_id")),
+                        TaskDescription = reader.IsDBNull(reader.GetOrdinal("task_description"))
+                            ? string.Empty
+                            : reader.GetString(reader.GetOrdinal("task_description")),
+                        CategoryId = reader.GetInt32(reader.GetOrdinal("category_id")),
+                        IsCompleted = reader.GetBoolean(reader.GetOrdinal("is_completed")),
+                        Position = reader.IsDBNull(reader.GetOrdinal("position"))
+                            ? 0
+                            : reader.GetInt32(reader.GetOrdinal("position")),
+                        PointsReward = reader.GetInt32(reader.GetOrdinal("points_reward"))
+                    });
+                }
+
+                return tasks;
+            }
+
+            public async Task<bool> DeleteTask(int taskId)
+            {
+                await using var conn = GetConnection();
+                await conn.OpenAsync();
+
+                var sql = @"
+					DELETE FROM user_tasks
+					WHERE task_id = @taskid
+				";
+
+                try
+                {
+                    await using var cmd = new NpgsqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("taskid", taskId);
+
+                    int rowsAffected = await cmd.ExecuteNonQueryAsync();
+                    return rowsAffected == 1;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+
+            public async Task<int?> UpdateTaskCompletion(int taskId, bool isCompleted)
+            {
+                await using var conn = GetConnection();
+                await conn.OpenAsync();
+                await using var transaction = await conn.BeginTransactionAsync();
+
+				try
+				{
+					// Load task info and current completion flag
+					var selectSql = @"
+						SELECT user_id, is_completed
+						FROM user_tasks
+						WHERE task_id = @taskid
+						FOR UPDATE
+					";
+					int userId;
+					bool previousCompleted;
+
+					await using (var selectCmd = new NpgsqlCommand(selectSql, conn, transaction))
+					{
+						selectCmd.Parameters.AddWithValue("taskid", taskId);
+						await using var reader = await selectCmd.ExecuteReaderAsync();
+						if (!await reader.ReadAsync())
+						{
+							return null;
+						}
+
+						userId = reader.GetInt32(reader.GetOrdinal("user_id"));
+						previousCompleted = reader.GetBoolean(reader.GetOrdinal("is_completed"));
+					}
+
+					// Update completion state
+					var updateTaskSql = @"
+						UPDATE user_tasks
+						SET is_completed = @completed
+						WHERE task_id = @taskid
+					";
+					await using (var updateTaskCmd = new NpgsqlCommand(updateTaskSql, conn, transaction))
+					{
+						updateTaskCmd.Parameters.AddWithValue("completed", isCompleted);
+						updateTaskCmd.Parameters.AddWithValue("taskid", taskId);
+						await updateTaskCmd.ExecuteNonQueryAsync();
+					}
+
+					// Adjust user points when the completion flag changes (fixed at +/-5)
+					int delta = 0;
+					const int reward = 5;
+					if (isCompleted && !previousCompleted)
+					{
+						delta = reward;
+					}
+					else if (!isCompleted && previousCompleted)
+					{
+						delta = -reward;
+					}
+
+					int newPoints;
+					var updateUserSql = @"
+						UPDATE users
+						SET points = GREATEST(points + @delta, 0)
+						WHERE user_id = @userid
+						RETURNING points
+					";
+
+					await using (var updateUserCmd = new NpgsqlCommand(updateUserSql, conn, transaction))
+					{
+						updateUserCmd.Parameters.AddWithValue("delta", delta);
+						updateUserCmd.Parameters.AddWithValue("userid", userId);
+						var result = await updateUserCmd.ExecuteScalarAsync();
+						newPoints = result is int points ? points : 0;
+					}
+
+					await transaction.CommitAsync();
+					return newPoints;
+				}
+				catch
+				{
+					await transaction.RollbackAsync();
+					return null;
+				}
+			}
+        }
+    }
 }
