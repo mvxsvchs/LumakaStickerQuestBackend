@@ -614,7 +614,29 @@ namespace LumakaStickerQuestBackend.Functions
 
 			public async Task<bool> UpdateField(Field field)
 			{
-				return false;
+				await using var conn = GetConnection();
+				await conn.OpenAsync();
+
+				var sql = @"
+					UPDATE users
+					SET field_name = @fieldName, sticker = @sticker
+					WHERE field_id = @fieldId;
+				";
+
+				try
+				{
+					await using var cmd = new NpgsqlCommand(sql, conn);
+					cmd.Parameters.AddWithValue("fieldId", field.Id);
+					cmd.Parameters.AddWithValue("fieldName", field.Name);
+					cmd.Parameters.AddWithValue("sticker", field.StickerId);
+
+					int rowsAffected = await cmd.ExecuteNonQueryAsync();
+					return rowsAffected == 1;
+				}
+				catch
+				{
+					return false;
+				}
 			}
 
 			public async Task<bool> DeleteBoard(int userId)
