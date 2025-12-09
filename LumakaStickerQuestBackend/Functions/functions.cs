@@ -17,7 +17,7 @@ namespace LumakaStickerQuestBackend.Functions
         // Functions for operations related to users
         public class UserS
         {
-            private static UserDto MapReaderToFeUser(NpgsqlDataReader reader)
+            private static UserDto MapReaderToUserDto(NpgsqlDataReader reader)
             {
                 var stickerOrdinal = reader.GetOrdinal("sticker_id");
                 var stickerIds = reader.IsDBNull(stickerOrdinal)
@@ -49,7 +49,7 @@ namespace LumakaStickerQuestBackend.Functions
 
                 await using var reader = await cmd.ExecuteReaderAsync();
                 return await reader.ReadAsync()
-                    ? MapReaderToFeUser(reader)
+                    ? MapReaderToUserDto(reader)
                     : null;
             }
 
@@ -86,7 +86,7 @@ namespace LumakaStickerQuestBackend.Functions
                     return null;
                 }
 
-                return MapReaderToFeUser(reader);
+                return MapReaderToUserDto(reader);
             }
 
             public async Task<bool> RegisterUser(RegisterDto user)
@@ -142,8 +142,7 @@ namespace LumakaStickerQuestBackend.Functions
 
                     int rowsAffected = await cmd.ExecuteNonQueryAsync();
                     return
-                        rowsAffected ==
-                        1; // i want to add validation here, but db connection currently fails; actually this might already be validation
+                        rowsAffected == 1;
                 }
                 catch
                 {

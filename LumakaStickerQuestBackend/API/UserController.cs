@@ -8,12 +8,12 @@ namespace LumakaStickerQuestBackend.API
 {
 	[ApiController] // properties for api controllers
 	[Route("api/user")]
-	public class QuestController : ControllerBase
+	public class UserController : ControllerBase
 	{
 		private readonly Services.UserS _userService;
 
 		// dependency injection (provides an instance of the service class UserS
-		public QuestController(Services.UserS userService)
+		public UserController(Services.UserS userService)
 		{
 			_userService = userService;
 		}
