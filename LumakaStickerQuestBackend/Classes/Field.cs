@@ -8,7 +8,7 @@ namespace LumakaStickerQuestBackend.Classes
 		/// </summary>
 
 		public int Id { get; set; }
-		public string Position { get; set; }
-		public bool IsFilled { get; set; } // modify later for stickers?
+		public string Name { get; set; }
+		public int StickerId { get; set; }
 	}
 }

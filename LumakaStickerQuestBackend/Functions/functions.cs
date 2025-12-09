@@ -1,6 +1,7 @@
 using LumakaStickerQuestBackend.Classes;
 using Npgsql;
 using System.Globalization;
+using static LumakaStickerQuestBackend.Functions.Services;
 
 
 namespace LumakaStickerQuestBackend.Functions
@@ -435,5 +436,82 @@ namespace LumakaStickerQuestBackend.Functions
 				}
 			}
         }
+
+        // Function for operations related to boards
+        public class BoardS
+        {
+            public async Task<Board?> GetBoard(int userId)
+            {
+				await using var conn = GetConnection();
+				await conn.OpenAsync();
+
+				var sql = @"
+					SELECT board_id, user_id, is_completed, created_at
+					FROM bingo_boards
+					WHERE user_id = @userId
+				";
+
+				try
+				{
+					await using var cmd = new NpgsqlCommand(sql, conn);
+					cmd.Parameters.AddWithValue("userId", userId);
+
+					await using var reader = await cmd.ExecuteReaderAsync();
+					
+					Field[] tempFields = new Field[9];
+                    tempFields = await GetFields(reader.GetInt32(reader.GetOrdinal("board_id")));
+
+                    return new Board
+					{
+						Id = reader.GetInt32(reader.GetOrdinal("board_id")),
+						UserId = reader.GetInt32(reader.GetOrdinal("user_id")),
+						IsCompleted = reader.GetBoolean(reader.GetOrdinal("is_completed")),
+						Fields = tempFields
+					};
+				}
+				catch
+				{
+					return null;
+				}
+			}
+
+			public async Task<Field[]> GetFields(int boardId)
+			{
+				await using var conn = GetConnection();
+				await conn.OpenAsync();
+
+				var sql = @"
+					SELECT field_id, field_name, sticker, board_id
+					FROM bingo_fields
+					WHERE board_id = @boardId
+				";
+
+				try
+				{
+					await using var cmd = new NpgsqlCommand(sql, conn);
+					cmd.Parameters.AddWithValue("boardId", boardId);
+
+					await using var reader = await cmd.ExecuteReaderAsync();
+					
+					var fields = new List<Field>();
+
+					while (await reader.ReadAsync())
+					{
+						fields.Add(new Field
+						{
+							Id = reader.GetInt32(reader.GetOrdinal("field_id")),
+							Name = reader.GetString(reader.GetOrdinal("field_name")),
+							StickerId = reader.GetInt32(reader.GetOrdinal("sticker"))
+						});
+					}
+
+					return fields.ToArray();
+				}
+				catch
+				{
+					return null;
+				}
+			}
+		}
     }
 }

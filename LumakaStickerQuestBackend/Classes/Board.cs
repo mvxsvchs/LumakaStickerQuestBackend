@@ -8,6 +8,7 @@ namespace LumakaStickerQuestBackend.Classes
 		/// </summary>
 
 		public int Id { get; set; }
+		public int UserId { get; set; }
 		public Field[] Fields { get; set; }
 		public bool IsCompleted { get; set; }
 	}
