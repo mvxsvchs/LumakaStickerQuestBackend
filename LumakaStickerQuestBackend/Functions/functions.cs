@@ -592,6 +592,30 @@ namespace LumakaStickerQuestBackend.Functions
 			{
 				return false;
 			}
+
+			public async Task<bool> DeleteBoard(int userId)
+			{
+				await using var conn = GetConnection();
+				await conn.OpenAsync();
+
+				var sql = @"
+					DELETE FROM bingo_boards
+					WHERE user_id = @userId
+				";
+
+				try
+				{
+					await using var cmd = new NpgsqlCommand(sql, conn);
+					cmd.Parameters.AddWithValue("userId", userId);
+
+					int rowsAffected = await cmd.ExecuteNonQueryAsync();
+					return rowsAffected == 1;
+				}
+				catch
+				{
+					return false;
+				}
+			}
 		}
     }
 }
