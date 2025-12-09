@@ -1,6 +1,8 @@
 using LumakaStickerQuestBackend.Classes;
 using Npgsql;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Xml.Linq;
 using static LumakaStickerQuestBackend.Functions.Services;
 
 
@@ -585,7 +587,29 @@ namespace LumakaStickerQuestBackend.Functions
 
 			public async Task<bool> UpdateBoard(Board board)
 			{
-				return false;
+				await using var conn = GetConnection();
+				await conn.OpenAsync();
+
+				var sql = @"
+					UPDATE users
+					SET is_completed = @completed
+					WHERE user_id = @userId AND board_id = @boardId;
+				";
+
+				try
+				{
+					await using var cmd = new NpgsqlCommand(sql, conn);
+					cmd.Parameters.AddWithValue("user_id", board.UserId);
+					cmd.Parameters.AddWithValue("board_id", board.Id);
+					cmd.Parameters.AddWithValue("completed", board.IsCompleted);
+
+					int rowsAffected = await cmd.ExecuteNonQueryAsync();
+					return rowsAffected == 1;
+				}
+				catch
+				{
+					return false;
+				}
 			}
 
 			public async Task<bool> UpdateField(Field field)
