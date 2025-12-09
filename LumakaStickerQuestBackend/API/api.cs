@@ -19,7 +19,7 @@ namespace LumakaStickerQuestBackend.API
 		}
 
 		[HttpGet("{id:int}")]
-		public async Task<ActionResult<FeUser>> GetUser(int id)
+		public async Task<ActionResult<UserDto>> GetUser(int id)
 		{
 			var user = await _userService.GetById(id);
 			if (user == null)
@@ -31,7 +31,7 @@ namespace LumakaStickerQuestBackend.API
 		}
 
 		[HttpGet("get/{id}")]
-		public async Task<ActionResult<FeUser>> GetUserByID(int id)
+		public async Task<ActionResult<UserDto>> GetUserByID(int id)
 		{
 			var user = await _userService.GetById(id);
 			if (user == null)
@@ -42,7 +42,7 @@ namespace LumakaStickerQuestBackend.API
 		}
 
 		[HttpPost("login")]
-		public async Task<ActionResult<FeUser>> GetUserByMailPwd([FromBody] FeLogin login)
+		public async Task<ActionResult<UserDto>> GetUserByMailPwd([FromBody] LoginDto login)
 		{
 			if (!ModelState.IsValid || login == null)
 			{
@@ -59,7 +59,7 @@ namespace LumakaStickerQuestBackend.API
 		}
 
 		[HttpPost("register")]
-		public async Task<ActionResult<bool>> RegisterNewUser([FromBody] FeRegister register)
+		public async Task<ActionResult<bool>> RegisterNewUser([FromBody] RegisterDto register)
 		{
 			if (!ModelState.IsValid || register == null)
 			{

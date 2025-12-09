@@ -17,14 +17,14 @@ namespace LumakaStickerQuestBackend.Functions
         // Functions for operations related to users
         public class UserS
         {
-            private static FeUser MapReaderToFeUser(NpgsqlDataReader reader)
+            private static UserDto MapReaderToFeUser(NpgsqlDataReader reader)
             {
                 var stickerOrdinal = reader.GetOrdinal("sticker_id");
                 var stickerIds = reader.IsDBNull(stickerOrdinal)
                     ? Array.Empty<int>()
                     : reader.GetFieldValue<int[]>(stickerOrdinal);
 
-				return new FeUser
+				return new UserDto
 				{
 					UserId = reader.GetInt32(reader.GetOrdinal("user_id")),
 					Username = reader.GetString(reader.GetOrdinal("username")),
@@ -33,7 +33,7 @@ namespace LumakaStickerQuestBackend.Functions
 				};
 			}
 
-            public async Task<FeUser?> GetById(int id)
+            public async Task<UserDto?> GetById(int id)
             {
                 await using var conn = GetConnection();
                 await conn.OpenAsync();
@@ -53,7 +53,7 @@ namespace LumakaStickerQuestBackend.Functions
                     : null;
             }
 
-            public async Task<FeUser?> GetByMailAndPwd(string mail, string pwd)
+            public async Task<UserDto?> GetByMailAndPwd(string mail, string pwd)
             {
                 if (string.IsNullOrWhiteSpace(mail) || string.IsNullOrWhiteSpace(pwd))
                 {
@@ -89,7 +89,7 @@ namespace LumakaStickerQuestBackend.Functions
                 return MapReaderToFeUser(reader);
             }
 
-            public async Task<bool> RegisterUser(FeRegister user)
+            public async Task<bool> RegisterUser(RegisterDto user)
             {
                 if (user == null
                     || string.IsNullOrWhiteSpace(user.Username)
