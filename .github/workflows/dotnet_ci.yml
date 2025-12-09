@@ -24,5 +24,32 @@ jobs:
       - name: Run Lint
         run: dotnet format --verify-no-changes || echo "Hinweis - Lintwarnung gefunden"
 
+  unit-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0.x'
+
       - name: Run Unit Tests
         run: dotnet test || echo "Hinweis - Unittest(s) fehlgeschlagen"
+
+  integration-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0.x'
+
+      - name: Run Integration Tests
+        run: dotnet test || echo "Hinweis - Integrationtest(s) fehlgeschlagen"
