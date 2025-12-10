@@ -11,5 +11,6 @@ namespace LumakaStickerQuestBackend.Classes
 		public int UserId { get; set; }
 		public Field[] Fields { get; set; }
 		public bool IsCompleted { get; set; }
+		public DateTime CreatedAt { get; set; }
 	}
 }

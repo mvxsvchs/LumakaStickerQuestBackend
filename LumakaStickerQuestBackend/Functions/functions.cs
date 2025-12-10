@@ -442,7 +442,17 @@ namespace LumakaStickerQuestBackend.Functions
         // Function for operations related to boards
         public class BoardS
         {
-            public async Task<Board?> GetBoard(int userId)
+			public static bool BoardValidation(DateTime createdAt)
+			{
+				DateTime now = DateTime.UtcNow;
+
+				int daysSinceSunday = (int)now.DayOfWeek;
+				DateTime lastSunday = now.Date.AddDays(-daysSinceSunday);
+
+				return createdAt > lastSunday;
+			}
+
+			public async Task<Board?> GetBoard(int userId)
             {
 				await using var conn = GetConnection();
 				await conn.OpenAsync();
@@ -463,13 +473,25 @@ namespace LumakaStickerQuestBackend.Functions
 					Field[] tempFields = new Field[9];
                     tempFields = await GetFields(reader.GetInt32(reader.GetOrdinal("board_id")));
 
-                    return new Board
+                    Board board = new Board
 					{
 						Id = reader.GetInt32(reader.GetOrdinal("board_id")),
 						UserId = reader.GetInt32(reader.GetOrdinal("user_id")),
 						IsCompleted = reader.GetBoolean(reader.GetOrdinal("is_completed")),
-						Fields = tempFields
+						Fields = tempFields,
+						CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at"))
 					};
+					if (BoardValidation(board.CreatedAt))
+					{
+						return board;
+					}
+					else
+					{
+						DeleteBoard(board.Id);
+						AddBoard(userId);
+						return await GetBoard(userId);
+					};
+
 				}
 				catch
 				{
