@@ -22,6 +22,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<Services>();
 builder.Services.AddScoped<Services.UserS>();
 builder.Services.AddScoped<Services.ListS>();
+builder.Services.AddScoped<Services.BoardS>();
 
 var app = builder.Build();
 

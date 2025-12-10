@@ -452,7 +452,7 @@ namespace LumakaStickerQuestBackend.Functions
 				return createdAt > lastSunday;
 			}
 
-			public async Task<Board?> GetBoard(int userId)
+            public async Task<Board?> GetBoard(int userId)
             {
 				await using var conn = GetConnection();
 				await conn.OpenAsync();
@@ -469,16 +469,27 @@ namespace LumakaStickerQuestBackend.Functions
 					cmd.Parameters.AddWithValue("userId", userId);
 
 					await using var reader = await cmd.ExecuteReaderAsync();
+					if (!await reader.ReadAsync())
+					{
+						var created = await AddBoard(userId);
+						if (!created)
+						{
+							return null;
+						}
+
+						return await GetBoard(userId);
+					}
+
+					var boardId = reader.GetInt32(reader.GetOrdinal("board_id"));
 					
-					Field[] tempFields = new Field[9];
-                    tempFields = await GetFields(reader.GetInt32(reader.GetOrdinal("board_id")));
+					var fields = await GetFields(boardId) ?? Array.Empty<Field>();
 
                     Board board = new Board
 					{
-						Id = reader.GetInt32(reader.GetOrdinal("board_id")),
+						Id = boardId,
 						UserId = reader.GetInt32(reader.GetOrdinal("user_id")),
 						IsCompleted = reader.GetBoolean(reader.GetOrdinal("is_completed")),
-						Fields = tempFields,
+						Fields = fields,
 						CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at"))
 					};
 					if (BoardValidation(board.CreatedAt))
@@ -487,8 +498,8 @@ namespace LumakaStickerQuestBackend.Functions
 					}
 					else
 					{
-						DeleteBoard(board.Id);
-						AddBoard(userId);
+						await DeleteBoard(board.UserId);
+						await AddBoard(userId);
 						return await GetBoard(userId);
 					};
 
@@ -521,11 +532,26 @@ namespace LumakaStickerQuestBackend.Functions
 
 					while (await reader.ReadAsync())
 					{
+						var stickerOrdinal = reader.GetOrdinal("sticker");
+						int? stickerId = null;
+						if (!reader.IsDBNull(stickerOrdinal))
+						{
+							var stickerValue = reader.GetValue(stickerOrdinal);
+							if (stickerValue is int intValue)
+							{
+								stickerId = intValue;
+							}
+							else if (stickerValue is string strValue && int.TryParse(strValue, out var parsed))
+							{
+								stickerId = parsed;
+							}
+						}
+
 						fields.Add(new Field
 						{
 							Id = reader.GetInt32(reader.GetOrdinal("field_id")),
 							Name = reader.GetString(reader.GetOrdinal("field_name")),
-							StickerId = reader.GetInt32(reader.GetOrdinal("sticker"))
+							StickerId = stickerId
 						});
 					}
 
@@ -533,13 +559,14 @@ namespace LumakaStickerQuestBackend.Functions
 				}
 				catch
 				{
-					return null;
+					// Returning an empty array keeps callers simple and avoids null checks.
+					return Array.Empty<Field>();
 				}
 			}
 
 			public async Task<bool> AddBoard(int userId)
 			{
-				if(userId == null || userId < 1)
+				if(userId < 1)
 				{
 					return false;
 				}
@@ -549,7 +576,8 @@ namespace LumakaStickerQuestBackend.Functions
 
 				var sql = @"
 					INSERT INTO bingo_boards (user_id, is_completed)
-					VALUES (@userId, @completed);
+					VALUES (@userId, @completed)
+					RETURNING board_id;
 				";
 
 				try
@@ -558,18 +586,18 @@ namespace LumakaStickerQuestBackend.Functions
 					cmd.Parameters.AddWithValue("userId", userId);
 					cmd.Parameters.AddWithValue("completed", false);
 
-					int rowsAffected = await cmd.ExecuteNonQueryAsync();
-					if(rowsAffected == 1)
+					var boardIdObj = await cmd.ExecuteScalarAsync();
+					if(boardIdObj is int boardId)
 					{
-						var tempBoard = GetBoard(userId);
 						for (int i = 1; i < 10; i++)
 						{
 							string position = i.ToString();
-							if(await AddField(tempBoard.Id, position) == false)
+							if(await AddField(boardId, position) == false)
 							{
 								return false;
 							};
 						}
+						return true;
 					}
 					return false;
 				}
@@ -581,7 +609,7 @@ namespace LumakaStickerQuestBackend.Functions
 
 			public async Task<bool> AddField(int boardId, string fieldPos)
 			{
-				if(boardId == null || boardId < 1)
+				if(boardId < 1)
 				{
 					return false;
 				}
@@ -591,7 +619,7 @@ namespace LumakaStickerQuestBackend.Functions
 
 				var sql = @"
 					INSERT INTO bingo_fields (board_id, field_name)
-					VALUES (@boardId), (@fieldPosition);
+					VALUES (@boardId, @fieldPosition);
 				";
 
 				try
@@ -601,7 +629,7 @@ namespace LumakaStickerQuestBackend.Functions
 					cmd.Parameters.AddWithValue("fieldPosition", fieldPos);
 
 					int rowsAffected = await cmd.ExecuteNonQueryAsync();
-					return rowsAffected == 9;
+					return rowsAffected == 1;
 				}
 				catch
 				{
@@ -652,7 +680,7 @@ namespace LumakaStickerQuestBackend.Functions
 					await using var cmd = new NpgsqlCommand(sql, conn);
 					cmd.Parameters.AddWithValue("fieldId", field.Id);
 					cmd.Parameters.AddWithValue("fieldName", field.Name);
-					cmd.Parameters.AddWithValue("sticker", field.StickerId);
+					cmd.Parameters.AddWithValue("sticker", field.StickerId.HasValue ? field.StickerId.Value : DBNull.Value);
 
 					int rowsAffected = await cmd.ExecuteNonQueryAsync();
 					return rowsAffected == 1;
@@ -689,8 +717,13 @@ namespace LumakaStickerQuestBackend.Functions
 
 			public async Task<string?> FillRandomField(int userId, int stickerId)
 			{
-				Board board = await GetBoard(userId);
-				Field[] fields = await GetFields(board.Id);
+				var board = await GetBoard(userId);
+				if (board == null)
+				{
+					return null;
+				}
+
+				var fields = await GetFields(board.Id) ?? Array.Empty<Field>();
 
 				var emptyFields = fields.Where(f => f.StickerId == null).ToList();
 				if (emptyFields.Count == 0)
