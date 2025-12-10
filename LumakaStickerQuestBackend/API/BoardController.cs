@@ -37,7 +37,7 @@ namespace LumakaStickerQuestBackend.API
 			return BadRequest();
 		}
 		
-		[HttpPost("post/field/{userId}")]
+		[HttpPost("field/{userId}")]
 		public async Task<ActionResult<string>> FillRandomField(int userId, [FromBody] stickerIdDto stickerId)
 		{
 			var success = await _boardService.FillRandomField(userId, stickerId.StickerId);
