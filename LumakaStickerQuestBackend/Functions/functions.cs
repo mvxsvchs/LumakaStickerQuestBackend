@@ -540,9 +540,13 @@ namespace LumakaStickerQuestBackend.Functions
 					if(rowsAffected == 1)
 					{
 						var tempBoard = GetBoard(userId);
-						if (await AddField(tempBoard.Id) != false) 
+						for (int i = 1; i < 10; i++)
 						{
-							return true;
+							string position = i.ToString();
+							if(await AddField(tempBoard.Id, position) == false)
+							{
+								return false;
+							};
 						}
 					}
 					return false;
@@ -553,7 +557,7 @@ namespace LumakaStickerQuestBackend.Functions
 				}
 			}
 
-			public async Task<bool> AddField(int boardId)
+			public async Task<bool> AddField(int boardId, string fieldPos)
 			{
 				if(boardId == null || boardId < 1)
 				{
@@ -564,17 +568,15 @@ namespace LumakaStickerQuestBackend.Functions
 				await conn.OpenAsync();
 
 				var sql = @"
-					INSERT INTO bingo_fields (board_id)
-					VALUES
-						(@boardId), (@boardId), (@boardId),
-						(@boardId), (@boardId), (@boardId),
-						(@boardId), (@boardId), (@boardId);
+					INSERT INTO bingo_fields (board_id, field_name)
+					VALUES (@boardId), (@fieldPosition);
 				";
 
 				try
 				{
 					await using var cmd = new NpgsqlCommand(sql, conn);
 					cmd.Parameters.AddWithValue("boardId", boardId);
+					cmd.Parameters.AddWithValue("fieldPosition", fieldPos);
 
 					int rowsAffected = await cmd.ExecuteNonQueryAsync();
 					return rowsAffected == 9;
