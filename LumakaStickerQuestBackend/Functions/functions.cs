@@ -686,6 +686,32 @@ namespace LumakaStickerQuestBackend.Functions
 					return false;
 				}
 			}
+
+			public async Task<string?> FillRandomField(int userId, int stickerId)
+			{
+				Board board = await GetBoard(userId);
+				Field[] fields = await GetFields(board.Id);
+
+				var emptyFields = fields.Where(f => f.StickerId == null).ToList();
+				if (emptyFields.Count == 0)
+				{
+					return null;
+				}
+
+				var random = new Random();
+				Field selectedField = emptyFields[random.Next(emptyFields.Count)];
+
+				selectedField.StickerId = stickerId;
+
+				if(await UpdateField(selectedField))
+				{
+					return selectedField.Name;
+				}
+				else
+				{
+					return null;
+				}
+			}
 		}
     }
 }
