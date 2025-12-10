@@ -642,7 +642,7 @@ namespace LumakaStickerQuestBackend.Functions
 				await conn.OpenAsync();
 
 				var sql = @"
-					UPDATE users
+					UPDATE bingo_fields
 					SET field_name = @fieldName, sticker = @sticker
 					WHERE field_id = @fieldId;
 				";
